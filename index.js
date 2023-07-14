@@ -7,9 +7,6 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
-//使用multer處理上傳檔案
-// const multer = require("multer");
-// const upload = multer({ dest: "tmp_uploads/" });
 
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
@@ -37,22 +34,15 @@ const corsOption = {
 };
 app.use(cors(corsOption));
 
-// 4.路由設定(按順序執行)
+// 4.路由設定(自行依序往下新增)
 app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`);
-  // res.render("home", { name: "yuuuu", db_user: process.env.DB_USER });
 });
 
-app.use("/products", require(__dirname + "/routes/products"));
+app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
 
-//當js是array or obj會自動回傳json
-app.get("/json", (req, res) => {
-  res.json({
-    name: "friend-trap",
-    age: 5,
-  });
-});
+
 
 //照片上傳（單張）
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
@@ -73,7 +63,6 @@ app.get("/try-db", async (req, res) => {
 
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
-app.get("*", express.static("node_modules/bootstrap/dist"));
 
 //自訂404頁面
 app.use((req, res) => {

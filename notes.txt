@@ -1,0 +1,4 @@
+.env、mysql2.js兩個檔案勿動，連接資料庫設定
+index.js 除了新增路由以外，其他程式碼勿動
+API放在routes資料夾
+自己的圖片在public新增一個資料夾匯入
