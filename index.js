@@ -24,10 +24,20 @@ const MysqlStore = require("express-mysql-session")(session);
 const db = require(__dirname + "/modules/mysql2");
 const sessionStore = new MysqlStore({}, db);
 
-// 2.建立 web server 物件
+// 2.取用express
 const app = express();
 
-// 3.路由設定(按順序執行)
+// 3.取用cors
+const cors = require("cors");
+const corsOption = {
+  credentials: true,
+  origin: (origin, cb) => {
+    cb(null, true);
+  },
+};
+app.use(cors(corsOption));
+
+// 4.路由設定(按順序執行)
 app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`);
