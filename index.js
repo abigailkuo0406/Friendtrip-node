@@ -61,6 +61,11 @@ app.get("/try-db", async (req, res) => {
   res.json(rows);
 });
 
+// 自訂行程-建立行程表單
+app.use("/itinerary", require(__dirname + "/routes/itinerary-create-task"));
+
+
+
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
 
