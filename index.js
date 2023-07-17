@@ -41,6 +41,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
+app.use("/restaurant", require(__dirname + "/routes/restaurant"))
 
 
 
