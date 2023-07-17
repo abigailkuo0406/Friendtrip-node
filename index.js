@@ -34,7 +34,7 @@ const corsOption = {
   },
 };
 app.use(cors(corsOption));
-const bcrypt = require("bcrypt");
+// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 // 4.路由設定(自行依序往下新增)
@@ -109,7 +109,7 @@ app.post("/login", async (req, res) => {
     member_id: rows[0].member_id,
     email: rows[0].email,
     member_name: rows[0].member_name,
-    imgages: rows[0].member_id,
+    images: rows[0].images,
     member_birth: rows[0].member_birth,
     id_number: rows[0].id_number,
     gender: rows[0].gender,
