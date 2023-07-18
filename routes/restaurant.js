@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
   //       `;
   // }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM restaurants ${where}`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM restaurant ${where}`;
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -43,7 +43,7 @@ router.get("/", async (req, res) => {
     //   output.redirect = req.baseUrl + "?page=" + totalPages;
     //   return res.json(output);
     // }
-    const sql = ` SELECT * FROM restaurants ${where} LIMIT ${
+    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
     [rows] = await db.query(sql);
