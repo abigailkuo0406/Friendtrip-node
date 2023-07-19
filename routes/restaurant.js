@@ -2,8 +2,8 @@ const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 // const dayjs = require("dayjs");
 const router = express.Router();
-// const upload = require(__dirname + "/../modules/img-upload");
-// const multipartParser = upload.none();
+const upload = require(__dirname + "/../modules/img-upload");
+const multipartParser = upload.none();
 
 router.get("/", async (req, res) => {
   let output = {
@@ -25,8 +25,8 @@ router.get("/", async (req, res) => {
   let where = " WHERE 1 ";
   // if (keyword) {
   //   const kw_escaped = db.escape("%" + keyword + "%");
-  //   where += ` AND ( 
-  //         \`bookname\` LIKE ${kw_escaped} 
+  //   where += ` AND (
+  //         \`bookname\` LIKE ${kw_escaped}
   //         OR
   //         \`author\` LIKE ${kw_escaped}
   //         )
@@ -77,4 +77,26 @@ router.get("/", async (req, res) => {
 //   }
 //   res.json(output);
 // });
+
+// 新增訂位資料
+router.post("/", multipartParser, async (req, res) => {
+  const sql = "INSERT INTO `reserve`" +
+    "(`member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)"+
+    " VALUES ( ?, ?, ?, ?, ?, NOW())";
+
+  const [result] = await db.query(sql, [
+    req.body.member_id,
+    req.body.rest_id,
+    req.body.reserve_date,
+    req.body.reserve_time,
+    req.body.reserve_people,
+  ])
+
+  // res.json(req.body);
+  res.json({
+    result,
+    postData: req.body
+  })
+});
+
 module.exports = router;
