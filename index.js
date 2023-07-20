@@ -58,12 +58,14 @@ app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
 
 //連線db
 app.get("/try-db", async (req, res) => {
-  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 2");
+  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1");
   res.json(rows);
 });
 
 // 自訂行程-建立行程表單
-app.use("/itinerary", require(__dirname + "/routes/itinerary-create-task"));
+app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
+
+
 
 
 

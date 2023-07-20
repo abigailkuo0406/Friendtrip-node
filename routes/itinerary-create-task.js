@@ -1,9 +1,11 @@
 const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
+const upload = require(__dirname + "/../modules/img-upload");
+const multipartParser = upload.none();
 
 
-router.post("/", async (req, res) => {
+router.get("/",async (req, res) => {
   // 給予預設值
   let output = {
     redirect: "",
@@ -36,29 +38,32 @@ router.post("/", async (req, res) => {
 });
 
 // 新增資料的功能
-router.post("/", async (req, res) => {
-  try {
+router.post("/",multipartParser, async (req, res) => {
+  // try {
     // TODO: 要檢查的欄位
     const sql =
       "INSERT INTO `itinerary` " +
       "(`img`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
-      "VALUES (?,?,?,?,?,?,?,?,NOW())";
+      "VALUES (?,?,?,?,?,?,?,NOW())";
 
     const [result] = await db.query(sql, [
       req.body.img,
-      req.body.date,
       req.body.name,
+      req.body.date,
       req.body.description,
+      req.body.public,
+      req.body.ppl,
+      req.body.note,
     ]);
-
     res.json({
       result,
       postData: req.body,
     });
-  } catch (error) {
-    // 處理錯誤，回傳錯誤訊息給前端
-    res.status(500).json({ error: "無法新增資料到資料庫" });
-  }
+    // res.json(req.body)
+  // } catch (error) {
+  //   // 處理錯誤，回傳錯誤訊息給前端
+  //   res.status(500).json({ error: "無法新增資料到資料庫" });
+  // }
 });
 
 module.exports = router;
