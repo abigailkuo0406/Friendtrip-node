@@ -65,6 +65,11 @@ app.get("/try-db", async (req, res) => {
 // 自訂行程-建立行程表單
 app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
 
+//自訂行程-上傳照片
+// app.post("/try-previw",upload.single('img'),(req,res)=>{
+//   console.log(req.file)
+//   res.json(req.file)
+// })
 
 
 

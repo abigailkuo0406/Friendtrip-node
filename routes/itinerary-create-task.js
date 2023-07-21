@@ -59,11 +59,12 @@ router.post("/",multipartParser, async (req, res) => {
       result,
       postData: req.body,
     });
-    // res.json(req.body)
-  // } catch (error) {
-  //   // 處理錯誤，回傳錯誤訊息給前端
-  //   res.status(500).json({ error: "無法新增資料到資料庫" });
-  // }
+
+// 上傳照片
+
+
+
+
 });
 
 module.exports = router;
