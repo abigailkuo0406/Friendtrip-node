@@ -42,9 +42,8 @@ app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`);
 });
-
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
-
+app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
   console.log(req.file);
