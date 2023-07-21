@@ -124,7 +124,7 @@ app.post("/login", async (req, res) => {
     member_id: rows[0].member_id,
     email: rows[0].email,
     member_name: rows[0].member_name,
-    images: rows[0].member_id,
+    images: rows[0].images,
     member_birth: rows[0].member_birth,
     id_number: rows[0].id_number,
     gender: rows[0].gender,
@@ -148,8 +148,33 @@ app.post("/login", async (req, res) => {
   res.json(output);
 });
 
+// app.get("/product", async (req, res) => {
+//   let output = {};
+//   let rows = [];
+
+//   const sql = `SELECT * FROM products`;
+//   [rows] = await db.query(sql);
+
+//   output = {
+//     product_id: rows[0].product_id,
+//     product_name: rows[0].product_name,
+//     product_pirce: rows[0].product_pirce,
+//     product_brief: rows[0].product_brief,
+//     product_category: rows[0].product_category,
+//     product_launch: rows[0].product_launch,
+//     product_discon: rows[0].product_discon,
+//     product_main_img: rows[0].product_main_img,
+//     product_description: rows[0].product_description,
+//     product_post: rows[0].product_post,
+//     product_update: rows[0].product_update,
+//     product_upload: rows[0].product_upload,
+//   };
+//   return res.json(output);
+// });
+
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
+app.use("/product", require(__dirname + "/routes/product"));
 
 //自訂404頁面
 app.use((req, res) => {
