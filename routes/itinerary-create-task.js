@@ -1,8 +1,11 @@
 const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
-const upload = require(__dirname + "/../modules/img-upload");
-const multipartParser = upload.none();
+// const upload = require(__dirname + "/../modules/img-upload");
+const previewInitImg = require(__dirname + "/../modules/itinerary-img-preview");
+const multipartParser = previewInitImg.none();
+
+
 
 
 router.get("/",async (req, res) => {
@@ -39,15 +42,16 @@ router.get("/",async (req, res) => {
 
 // 新增資料的功能
 router.post("/",multipartParser, async (req, res) => {
+  // console.log('billy debug',req.body)
   // try {
     // TODO: 要檢查的欄位
     const sql =
       "INSERT INTO `itinerary` " +
-      "(`img`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
+      "(`coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
       "VALUES (?,?,?,?,?,?,?,NOW())";
 
     const [result] = await db.query(sql, [
-      req.body.img,
+      req.body.coverPhoto,
       req.body.name,
       req.body.date,
       req.body.description,

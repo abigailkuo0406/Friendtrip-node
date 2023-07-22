@@ -10,6 +10,9 @@ if (process.argv[2] === "production") {
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 
+// 建立自訂行程照片上傳到指定資料夾
+const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
+
 // 1.引入express
 const express = require("express");
 
@@ -65,11 +68,15 @@ app.get("/try-db", async (req, res) => {
 // 自訂行程-建立行程表單
 app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
 
+
+
+
 //自訂行程-上傳照片
-// app.post("/try-previw",upload.single('img'),(req,res)=>{
-//   console.log(req.file)
-//   res.json(req.file)
-// })
+app.post("/try-preview",previewInitImg.single('coverPhoto'),(req,res)=>{
+  console.log(req.file)
+  res.json(req.file)
+  console.log('Fuck')
+})
 
 
 
@@ -147,6 +154,7 @@ app.post("/login", async (req, res) => {
 
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
+
 
 //自訂404頁面
 app.use((req, res) => {
