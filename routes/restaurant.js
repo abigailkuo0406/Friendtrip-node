@@ -43,9 +43,8 @@ router.get("/", async (req, res) => {
     //   output.redirect = req.baseUrl + "?page=" + totalPages;
     //   return res.json(output);
     // }
-    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${
-      perPage * (page - 1)
-    }, ${perPage}`;
+    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${perPage * (page - 1)
+      }, ${perPage}`;
     [rows] = await db.query(sql);
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows };
@@ -81,10 +80,12 @@ router.get("/", async (req, res) => {
 // 新增訂位資料
 router.post("/", multipartParser, async (req, res) => {
   const sql = "INSERT INTO `reserve`" +
-    "(`member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)"+
+    "(`member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)" +
     " VALUES ( ?, ?, ?, ?, ?, NOW())";
 
-  const [result] = await db.query(sql, [
+
+  // req.body 是透過 multipartParser 解析後的物件，包含客戶端 POST 請求中所攜帶的資料。在這段程式碼中，使用了 req.body 來獲取客戶端提交的 member_id, rest_id, reserve_date, reserve_time, reserve_people 等欄位的值，並將這些值作為參數傳遞給 SQL 查詢中的問號佔位符，完成資料庫插入操作。
+  const [result1] = await db.query(sql, [
     req.body.member_id,
     req.body.rest_id,
     req.body.reserve_date,
@@ -94,9 +95,24 @@ router.post("/", multipartParser, async (req, res) => {
 
   // res.json(req.body);
   res.json({
-    result,
+    result1,
     postData: req.body
   })
+
+  // 新增邀請好友資料
+  const sql2 = "INSERT INTO `invite_member`" +
+    "(`reserve_id`, `iv_member_id`, `created_time`)" +
+    " VALUES ( ?, ?, NOW())";
+
+  const ivListLength = req.body.iv_member_id.length
+  for (let i = 0; i < ivListLength; i++) {
+    const [result2] = await db.query(sql2, [
+      result1.insertId,
+      req.body.iv_member_id[i],
+
+    ])
+  }
+
 });
 
 module.exports = router;
