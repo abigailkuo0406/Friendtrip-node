@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     page: 1,
     rows: [],
   };
-  const perPage = 1;
+  const perPage = 10;
   // let keyword = req.query.keyword || "";
   let page = req.query.page ? parseInt(req.query.page) : 1;
   // if (!page || page < 1) {
@@ -104,14 +104,17 @@ router.post("/", multipartParser, async (req, res) => {
     "(`reserve_id`, `iv_member_id`, `created_time`)" +
     " VALUES ( ?, ?, NOW())";
 
-  const ivListLength = req.body.iv_member_id.length
-  for (let i = 0; i < ivListLength; i++) {
-    const [result2] = await db.query(sql2, [
-      result1.insertId,
-      req.body.iv_member_id[i],
+  if (req.body.iv_member_id) {
+    const ivListLength = req.body.iv_member_id.length
+    for (let i = 0; i < ivListLength; i++) {
+      const [result2] = await db.query(sql2, [
+        result1.insertId,
+        req.body.iv_member_id[i],
 
-    ])
+      ])
+    }
   }
+
 
 });
 
