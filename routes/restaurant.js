@@ -17,6 +17,9 @@ router.get("/", async (req, res) => {
   const perPage = 10;
   // let keyword = req.query.keyword || "";
   let page = req.query.page ? parseInt(req.query.page) : 1;
+  console.log('req.query1:', req.query)
+  console.log('req.query.page:', req.query.page)
+  console.log('page:',page)
   // if (!page || page < 1) {
   //   output.redirect = req.baseUrl;
   //   return res.json(output);
@@ -93,27 +96,27 @@ router.post("/", multipartParser, async (req, res) => {
     req.body.reserve_people,
   ])
 
-  // res.json(req.body);
-  res.json({
-    result1,
-    postData: req.body
-  })
+  res.json(req.body);
+  // res.json({
+  //   result1,
+  //   postData: req.body
+  // })
 
   // 新增邀請好友資料
-  const sql2 = "INSERT INTO `invite_member`" +
-    "(`reserve_id`, `iv_member_id`, `created_time`)" +
-    " VALUES ( ?, ?, NOW())";
+  // const sql2 = "INSERT INTO `invite_member`" +
+  //   "(`reserve_id`, `iv_member_id`, `created_time`)" +
+  //   " VALUES ( ?, ?, NOW())";
 
-  if (req.body.iv_member_id) {
-    const ivListLength = req.body.iv_member_id.length
-    for (let i = 0; i < ivListLength; i++) {
-      const [result2] = await db.query(sql2, [
-        result1.insertId,
-        req.body.iv_member_id[i],
+  // if (req.body.iv_member_id) {
+  //   const ivListLength = req.body.iv_member_id.length
+  //   for (let i = 0; i < ivListLength; i++) {
+  //     const [result2] = await db.query(sql2, [
+  //       result1.insertId,
+  //       req.body.iv_member_id[i],
 
-      ])
-    }
-  }
+  //     ])
+  //   }
+  // }
 
 
 });

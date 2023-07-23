@@ -5,6 +5,12 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
+router.post("/", multipartParser, async (req, res) => {
+  // console.log(req.body.rid)
+  res.json(req.body);
+
+})
+
 router.get("/", async (req, res) => {
   let output = {
     redirect: "",
@@ -15,23 +21,17 @@ router.get("/", async (req, res) => {
     rows: [],
   };
   const perPage = 4;
-  // let keyword = req.query.keyword || "";
   let page = req.query.page ? parseInt(req.query.page) : 1;
+
+
+
   // if (!page || page < 1) {
   //   output.redirect = req.baseUrl;
   //   return res.json(output);
   // }
 
   let where = " WHERE 1 ";
-  // if (keyword) {
-  //   const kw_escaped = db.escape("%" + keyword + "%");
-  //   where += ` AND (
-  //         \`bookname\` LIKE ${kw_escaped}
-  //         OR
-  //         \`author\` LIKE ${kw_escaped}
-  //         )
-  //       `;
-  // }
+
 
   const t_sql = `SELECT COUNT(1) totalRows FROM restaurants_img ${where}`;
   const [[{ totalRows }]] = await db.query(t_sql);
@@ -49,5 +49,7 @@ router.get("/", async (req, res) => {
   output = { ...output, totalRows, perPage, totalPages, page, rows };
   return res.json(output);
 });
+
+
 
 module.exports = router;
