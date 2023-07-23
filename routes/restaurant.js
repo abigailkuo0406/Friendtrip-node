@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     page: 1,
     rows: [],
   };
-  const perPage = 4;
+  const perPage = 1;
   // let keyword = req.query.keyword || "";
   let page = req.query.page ? parseInt(req.query.page) : 1;
   // if (!page || page < 1) {
