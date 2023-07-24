@@ -45,6 +45,10 @@ app.get("/", (req, res) => {
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
 app.use("/restaurant", require(__dirname + "/routes/restaurant"))
 app.use("/restphoto", require(__dirname + "/routes/rest-photo"))
+app.use("/area", require(__dirname + "/routes/area"))
+app.use("/restmeal", require(__dirname + "/routes/rest-meal"))
+
+
 
 app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
