@@ -75,7 +75,6 @@ app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"
 app.post("/try-preview",previewInitImg.single('coverPhoto'),(req,res)=>{
   console.log(req.file)
   res.json(req.file)
-  console.log('Fuck')
 })
 
 
