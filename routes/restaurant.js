@@ -112,7 +112,7 @@ router.post("/", multipartParser, async (req, res) => {
     postData: req.body,
   });
 
-  新增邀請好友資料;
+  // 新增邀請好友資料;
   const sql2 =
     "INSERT INTO `invite_member`" +
     "(`reserve_id`, `iv_member_id`, `created_time`)" +
