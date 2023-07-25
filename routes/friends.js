@@ -11,7 +11,9 @@ router.get("/", async (req, res) => {
   const [[{ totalRows }]] = await db.query(t_sql);
   let rows = [];
 
-  const sql = ` SELECT * FROM friends WHERE 1`;
+  const sql = ` SELECT memberId,FriendId,member_name,images FROM friends INNER JOIN member
+    ON friends.FriendId = member.member_id WHERE memberId=1`;
+
   [rows] = await db.query(sql);
 
   output = {
