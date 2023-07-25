@@ -61,7 +61,7 @@ app.get("/try-db", async (req, res) => {
   const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 2");
   res.json(rows);
 });
-
+app.use("/login", require(__dirname + "/routes/auth"));
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
@@ -71,6 +71,7 @@ app.post("/login", async (req, res) => {
     code: 0,
     error: "",
   };
+
   if (!req.body.email || !req.body.password) {
     output.error = "欄位資料不足";
     return res.json(output);
@@ -83,8 +84,10 @@ app.post("/login", async (req, res) => {
     output.error = "找不到此帳號";
     return res.json(output);
   }
+  console.log(rows[0].password);
   // const verified = await bcrypt.compare(req.body.password, rows[0].password);
-  const verified = true; // 測試用，不管前端輸入什麼密碼皆會通過
+  const verified = rows[0].password === req.body.password; // 測試用，不管前端輸入什麼密碼皆會通過
+  console.log(verified);
   if (!verified) {
     // 密碼是錯的
     output.code = 406;
