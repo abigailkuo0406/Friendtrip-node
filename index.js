@@ -47,6 +47,8 @@ app.use("/restaurant", require(__dirname + "/routes/restaurant"))
 app.use("/restphoto", require(__dirname + "/routes/rest-photo"))
 app.use("/area", require(__dirname + "/routes/area"))
 app.use("/restmeal", require(__dirname + "/routes/rest-meal"))
+app.use("/friends", require(__dirname + "/routes/friends"))
+
 
 
 

@@ -15,8 +15,12 @@ router.get("/", async (req, res) => {
     rows: [],
   };
 
-  const perPage = 2; //一頁幾筆資料
-  // // let keyword = req.query.keyword || "";
+  const perPage = 4; //一頁幾筆資料
+
+  //取得queryString查詢條件
+  let city = req.query.city || ""; 
+  let meal = req.query.meal || ""; 
+
   let page = req.query.page ? parseInt(req.query.page) : 1; //第幾頁
 
   // 如果page是NaN或小於1的數字，將頁面導向當前路徑的URL(http://localhost:3002/restaurant)
@@ -27,15 +31,19 @@ router.get("/", async (req, res) => {
   }
 
   let where = " WHERE 1 ";
-  // // if (keyword) {
-  // //   const kw_escaped = db.escape("%" + keyword + "%");
-  // //   where += ` AND (
-  // //         \`bookname\` LIKE ${kw_escaped}
-  // //         OR
-  // //         \`author\` LIKE ${kw_escaped}
-  // //         )
-  // //       `;
-  // // }
+
+  //設定有關鍵字時，SQL查詢語法
+  if (city || meal) {
+    const city_escaped = db.escape("%" + city + "%");
+    const meal_escaped = db.escape("%" + meal + "%");
+
+    where += ` AND (
+          \`RestArea\` LIKE ${city_escaped}
+          AND
+          \`RestMeal\` LIKE ${meal_escaped}
+          )
+        `;
+  }
 
   const t_sql = `SELECT COUNT(1) totalRows FROM restaurant ${where}`; // 查詢資料總數
   const [[{ totalRows }]] = await db.query(t_sql); //總筆數
