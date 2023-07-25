@@ -4,6 +4,7 @@ const dayjs = require("dayjs");
 const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
+const jwt = require("jsonwebtoken");
 
 router.get("/", async (req, res) => {
   let output = {
@@ -52,7 +53,7 @@ router.get("/", async (req, res) => {
   return res.json(output);
 });
 
-router.post("/login", async (req, res) => {
+router.post("/admin", async (req, res) => {
   const output = {
     success: false,
     code: 0,
