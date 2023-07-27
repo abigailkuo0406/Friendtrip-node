@@ -1,8 +1,14 @@
 const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 const dayjs = require("dayjs");
-
 const router = express.Router();
+const upload = require(__dirname + "/../modules/img-upload");
+const multipartParser = upload.none();
+
+router.post("/", multipartParser, async (req, res) => {
+  console.log(req.body.memberId);
+  res.json(req.body);
+});
 
 const getListData = async (req) => {
   let output = {
