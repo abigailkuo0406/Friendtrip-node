@@ -37,14 +37,41 @@ app.use(cors(corsOption));
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+  
+});
+
 // 4.路由設定(自行依序往下新增)
 app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`);
 });
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
-app.use("/restaurant", require(__dirname + "/routes/restaurant"))
-app.use("/restphoto", require(__dirname + "/routes/rest-photo"))
+app.use("/restaurant", require(__dirname + "/routes/restaurant"));
+app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
 
 app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
@@ -65,16 +92,16 @@ app.get("/try-db", async (req, res) => {
 });
 
 // 自訂行程-建立行程表單
-app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+);
 
 //自訂行程-上傳照片
 // app.post("/try-previw",upload.single('img'),(req,res)=>{
 //   console.log(req.file)
 //   res.json(req.file)
 // })
-
-
-
 
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));

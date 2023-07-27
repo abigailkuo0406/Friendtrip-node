@@ -5,7 +5,9 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
+
 router.get("/", async (req, res) => {
+ 
   let output = {
     redirect: "",
     totalRows: 0,
@@ -48,7 +50,7 @@ router.get("/", async (req, res) => {
     }, ${perPage}`;
     [rows] = await db.query(sql);
   }
-  output = { ...output, totalRows, perPage, totalPages, page, rows };
+  output = { ...output, totalRows, perPage, totalPages, page, rows , jwtData: res.locals.jwtData};
   return res.json(output);
 });
 
@@ -80,8 +82,9 @@ router.get("/", async (req, res) => {
 
 // 新增訂位資料
 router.post("/", multipartParser, async (req, res) => {
-  const sql = "INSERT INTO `reserve`" +
-    "(`member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)"+
+  const sql =
+    "INSERT INTO `reserve`" +
+    "(`member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)" +
     " VALUES ( ?, ?, ?, ?, ?, NOW())";
 
   const [result] = await db.query(sql, [
@@ -90,13 +93,13 @@ router.post("/", multipartParser, async (req, res) => {
     req.body.reserve_date,
     req.body.reserve_time,
     req.body.reserve_people,
-  ])
+  ]);
 
   // res.json(req.body);
   res.json({
     result,
-    postData: req.body
-  })
+    postData: req.body,
+  });
 });
 
 module.exports = router;
