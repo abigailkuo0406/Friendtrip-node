@@ -62,6 +62,7 @@ app.get("/try-db", async (req, res) => {
   res.json(rows);
 });
 app.use("/login", require(__dirname + "/routes/auth"));
+app.use("/register", require(__dirname + "/routes/register"));
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
