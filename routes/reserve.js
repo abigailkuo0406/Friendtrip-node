@@ -1,53 +1,59 @@
-const express = require('express')
-const db = require(__dirname + "/../modules/mysql2")
-const router = express.Router()
+const express = require("express");
+const db = require(__dirname + "/../modules/mysql2");
+const dayjs = require("dayjs");
 
-router.get("/", async (req, res) => {
-    let output = {
-        totalRows: 0,
-        perPage: 25,
-        totalPages: 0,
-        page: 1,
-        rows: []
-    };
+const router = express.Router();
 
-    const perPage = 10;
+const getListData = async (req) => {
+  let output = {
+    totalRows: 0,
+    perPage: 25,
+    totalPages: 0,
+    page: 1,
+    rows: [],
+  };
 
-    let page = req.query.page ? parseInt(req.query.page) : 1;
+  const perPage = 10;
 
-    if (!page || page < 1) {
-        return res.redirect(req.baseUrl)
-    };
+  let page = req.query.page ? parseInt(req.query.page) : 1;
 
-    const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE member_id=3`;
-    const [[{ totalRows }]] = await db.query(t_sql);
+  if (!page || page < 1) {
+    return res.redirect(req.baseUrl);
+  }
 
-    let totalPages = 0;
-    let rows = []
+  const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=3`;
+  const [[{ totalRows }]] = await db.query(t_sql);
 
-    if (totalRows) {
-        totalPages = Math.ceil(totalRows / perPage);
+  let totalPages = 0;
+  let rows = [];
 
-        if (page > totalPages) {
-            return res.redirect(req.baseUrl + "?page=" + totalPages);
+  if (totalRows) {
+    totalPages = Math.ceil(totalRows / perPage);
 
-        }
-        const sql = ` SELECT  member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,invite_id ,iv_member_id 
+    if (page > totalPages) {
+      return res.redirect(req.baseUrl + "?page=" + totalPages);
+    }
+    const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,invite_id ,iv_member_id 
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
         LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id
-        WHERE member_id=3
-        LIMIT ${perPage * (page - 1)
-            }, ${perPage}`;
-        [rows] = await db.query(sql);
+        WHERE reserve_member_id=3
+        LIMIT ${perPage * (page - 1)}, ${perPage}`;
+    [rows] = await db.query(sql);
+  }
 
-    };
+  output = { ...output, totalRows, perPage, totalPages, page, rows };
 
-    output = { ...output, totalRows, perPage, totalPages, page, rows };
+  return output;
+};
+router.get("/", async (req, res) => {
+  const output = await getListData(req);
+  output.rows.forEach((i) => {
+    i.reserve_date = dayjs(i.reserve_date).format("YYYY-MM-DD");
+    // delete i.created_at;
+  });
 
-    return res.json(output);
+  res.json(output);
+});
 
-})
-
-module.exports = router
-
+module.exports = router;

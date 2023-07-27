@@ -49,6 +49,8 @@ app.use("/area", require(__dirname + "/routes/area"))
 app.use("/restmeal", require(__dirname + "/routes/rest-meal"))
 app.use("/friends", require(__dirname + "/routes/friends"))
 app.use("/reserve", require(__dirname + "/routes/reserve"))
+app.use("/reserveinvites", require(__dirname + "/routes/reserve-invites"))
+
 
 
 
