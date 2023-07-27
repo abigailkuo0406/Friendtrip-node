@@ -61,22 +61,29 @@ app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
 
 //連線db
 app.get("/try-db", async (req, res) => {
-  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1");
+  const [rows] = await db.query("SELECT * FROM `itinerary` LIMIT 6");
   res.json(rows);
 });
 
 // 自訂行程-建立行程表單
-app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
-
-
-
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+);
 
 //自訂行程-上傳照片
-app.post("/try-preview",previewInitImg.single('coverPhoto'),(req,res)=>{
-  console.log(req.file)
-  res.json(req.file)
-})
+app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
 
+//自訂行程-儲存景點行程
+// app.post("/save-view"),(req,res)=>{
+//   console.log(req.body)
+//   res.json(req,res)
+// }
+
+app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
 
 
 
@@ -153,7 +160,6 @@ app.post("/login", async (req, res) => {
 
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
-
 
 //自訂404頁面
 app.use((req, res) => {

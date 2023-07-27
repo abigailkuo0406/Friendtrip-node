@@ -1,11 +1,11 @@
 const multer = require("multer");
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 //判斷存入照片的副檔名
 const extMap = {
-  "image/png": ".png",
-  "image/jpeg": ".jpg",
-  "image/gif": ".gif",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
   "image/webp": "webp",
 };
 
@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = extMap[file.mimetype];
-    cb(null, uuidv4() + ext);
+    cb(null, file.originalname);
   },
 });
 
@@ -24,11 +24,5 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   cb(null, !!extMap[file.mimetype]);
 };
-
-
-
-
-
-
 
 module.exports = multer({ fileFilter, storage });
