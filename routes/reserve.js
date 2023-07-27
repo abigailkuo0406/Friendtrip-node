@@ -5,11 +5,6 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
-router.post("/", multipartParser, async (req, res) => {
-  console.log(req.body.memberId);
-  res.json(req.body);
-});
-
 const getListData = async (req) => {
   let output = {
     totalRows: 0,
@@ -53,11 +48,15 @@ const getListData = async (req) => {
   return output;
 };
 router.get("/", async (req, res) => {
-  const output = await getListData(req);
+  let output = await getListData(req);
   output.rows.forEach((i) => {
     i.reserve_date = dayjs(i.reserve_date).format("YYYY-MM-DD");
     // delete i.created_at;
   });
+  output = {
+    ...output,
+    jwtData: res.locals.jwtData,
+  };
 
   res.json(output);
 });

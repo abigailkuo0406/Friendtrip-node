@@ -5,7 +5,9 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
+
 router.get("/", async (req, res) => {
+ 
   let output = {
     redirect: "",
     totalRows: 0,
@@ -67,7 +69,7 @@ router.get("/", async (req, res) => {
     }, ${perPage}`;
     [rows] = await db.query(sql);
   }
-  output = { ...output, totalRows, perPage, totalPages, page, rows };
+  output = { ...output, totalRows, perPage, totalPages, page, rows , jwtData: res.locals.jwtData};
   return res.json(output);
   // res.json({ totalRows, totalPages, page, perPage, rows });
 });

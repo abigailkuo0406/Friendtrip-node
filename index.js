@@ -37,6 +37,33 @@ app.use(cors(corsOption));
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+  
+});
+
 // 4.路由設定(自行依序往下新增)
 app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
@@ -75,7 +102,10 @@ app.get("/try-db", async (req, res) => {
 });
 
 // 自訂行程-建立行程表單
-app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"));
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+);
 
 //自訂行程-上傳照片
 // app.post("/try-previw",upload.single('img'),(req,res)=>{
@@ -83,9 +113,8 @@ app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"
 //   res.json(req.file)
 // })
 
-
-
-
+app.use("/login", require(__dirname + "/routes/auth"));
+app.use("/register", require(__dirname + "/routes/register"));
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
@@ -133,7 +162,7 @@ app.post("/login", async (req, res) => {
     member_id: rows[0].member_id,
     email: rows[0].email,
     member_name: rows[0].member_name,
-    images: rows[0].images,
+    images: rows[0].member_id,
     member_birth: rows[0].member_birth,
     id_number: rows[0].id_number,
     gender: rows[0].gender,
@@ -156,30 +185,6 @@ app.post("/login", async (req, res) => {
   // 把所有登入資料全部回應給發出 req 的檔案
   res.json(output);
 });
-
-// app.get("/product", async (req, res) => {
-//   let output = {};
-//   let rows = [];
-
-//   const sql = `SELECT * FROM products`;
-//   [rows] = await db.query(sql);
-
-//   output = {
-//     product_id: rows[0].product_id,
-//     product_name: rows[0].product_name,
-//     product_pirce: rows[0].product_pirce,
-//     product_brief: rows[0].product_brief,
-//     product_category: rows[0].product_category,
-//     product_launch: rows[0].product_launch,
-//     product_discon: rows[0].product_discon,
-//     product_main_img: rows[0].product_main_img,
-//     product_description: rows[0].product_description,
-//     product_post: rows[0].product_post,
-//     product_update: rows[0].product_update,
-//     product_upload: rows[0].product_upload,
-//   };
-//   return res.json(output);
-// });
 
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
