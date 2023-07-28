@@ -10,6 +10,9 @@ if (process.argv[2] === "production") {
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 
+// 建立自訂行程照片上傳到指定資料夾
+const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
+
 // 1.引入express
 const express = require("express");
 
@@ -87,7 +90,7 @@ app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
 
 //連線db
 app.get("/try-db", async (req, res) => {
-  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1");
+  const [rows] = await db.query("SELECT * FROM `itinerary` LIMIT 6");
   res.json(rows);
 });
 
@@ -103,6 +106,7 @@ app.use(
 //   res.json(req.file)
 // })
 
+app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));
 // 登入

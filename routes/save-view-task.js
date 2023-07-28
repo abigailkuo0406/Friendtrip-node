@@ -1,4 +1,3 @@
-const { application, query, response } = require("express");
 const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
@@ -16,7 +15,6 @@ router.get("/", async (req, res) => {
     page: 1,
     rows: [],
   };
-  console.log('this one')
   const perPage = 5; // 每頁有5筆
 
   let page = req.query.page ? parseInt(req.query.page) : 1;
@@ -28,7 +26,7 @@ router.get("/", async (req, res) => {
 
   let where = " WHERE 1 ";
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
+  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary_details ${where}`; // 總筆數
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -38,7 +36,7 @@ router.get("/", async (req, res) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = ` SELECT * FROM itinerary ${where} LIMIT ${
+    const sql = ` SELECT * FROM itinerary_details ${where} LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
     [rows] = await db.query(sql);
@@ -47,38 +45,48 @@ router.get("/", async (req, res) => {
   return res.json(output);
 });
 
-
-
-// 新增資料的功能
-router.post("/", multipartParser, async (req, res) => {
-  // TODO: 要檢查的欄位
-  const sql =
-    "INSERT INTO `itinerary` " +
-    "(`coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
-    "VALUES (?,?,?,?,?,?,?,NOW())";
-
-  const [result] = await db.query(sql, [
-    req.body.coverPhoto,
-    req.body.name,
-    req.body.date,
-    req.body.description,
-    req.body.public,
-    req.body.ppl,
-    req.body.note,
-  ]);
-  res.json({
-    result,
-    postData: req.body,
-  })});
-
+// 處理前端發送的陣列物件，新增行程
+router.post("/", multipartParser,  (req, res) => {
  
-  // 刪除行程紀錄資料的API
-router.delete("/:itin_id", async (req, res) => {
-    const { itin_id } = req.params;
-    const sql = `DELETE FROM itinerary WHERE itin_id=?`;
-    const [result] = await db.query(sql, [itin_id]);
-    res.json({ ...result, itin_id })
-});
+   const data=req.body
+
+  if(!data || !Array.isArray(data)){
+    return res.status(400).json({error:'無效的請求數據'})
+  }
+  console.log('req＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝>>>',req.body)
+
+ // 在資料庫中逐個儲存陣列物件
+data.forEach((item)=>{
+  const sql =
+  "INSERT INTO `itinerary_details` " +
+  "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
+  "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+  const values=[
+    item.itin_id,
+    item.itin_order,
+    item.formatted_address,
+    item.lat,
+    item.lng,
+    item.name,
+    item.phone_number,
+    '"'+item.weekday_text+'"',
+    item.startdatetime]
+
+    db.query(sql,values,(error,result)=>{
+      if(error){
+        console.error('資料儲存失敗',error)
+      }else{
+        console.log('資料儲存成功！')
+      }
+    })
+
+
+
+
+  })
+})
+
+
 
 
 
