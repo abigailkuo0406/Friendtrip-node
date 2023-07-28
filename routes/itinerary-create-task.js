@@ -54,10 +54,11 @@ router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查的欄位
   const sql =
     "INSERT INTO `itinerary` " +
-    "(`coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
-    "VALUES (?,?,?,?,?,?,?,NOW())";
+    "(`itin_member_id`, `coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
+    "VALUES (?,?,?,?,?,?,?,?,NOW())";
 
   const [result] = await db.query(sql, [
+    req.body.itin_member_id,
     req.body.coverPhoto,
     req.body.name,
     req.body.date,
