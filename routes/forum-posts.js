@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
   //       `;
   // }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM products ${where}`
+  const t_sql = `SELECT COUNT(1) totalRows FROM posts ${where}`
   const [[{ totalRows }]] = await db.query(t_sql)
   let totalPages = 0
   let rows = []
@@ -43,7 +43,8 @@ router.get("/", async (req, res) => {
     //   output.redirect = req.baseUrl + "?page=" + totalPages;
     //   return res.json(output);
     // }
-    const sql = ` SELECT * FROM products ${where} LIMIT ${perPage * (page - 1)}, ${perPage}`
+    const sql = ` SELECT * FROM posts INNER JOIN media_attachments on posts.post_id = media_attachments.post_id INNER JOIN users on posts.user_id = users.user_id `
+    // ${where} LIMIT ${perPage * (page - 1)}, ${perPage}
     ;[rows] = await db.query(sql)
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows }
@@ -62,7 +63,7 @@ router.get("/", async (req, res) => {
 //     // 沒有 sid
 //     output.error = "沒有 sid !";
 //   } else {
-//     const sql = `SELECT * FROM products WHERE sid=${book_sid}`;
+//     const sql = `SELECT * FROM posts WHERE sid=${book_sid}`;
 //     const [rows] = await db.query(sql);
 
 //     if (rows.length) {
