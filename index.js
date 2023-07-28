@@ -73,8 +73,18 @@ app.get("/", (req, res) => {
     <p>${process.env.DB_USER}</p>`);
 });
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
-app.use("/restaurant", require(__dirname + "/routes/restaurant"));
-app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
+app.use("/restaurant", require(__dirname + "/routes/restaurant"))
+app.use("/restphoto", require(__dirname + "/routes/rest-photo"))
+app.use("/area", require(__dirname + "/routes/area"))
+app.use("/restmeal", require(__dirname + "/routes/rest-meal"))
+app.use("/friends", require(__dirname + "/routes/friends"))
+app.use("/reserve", require(__dirname + "/routes/reserve"))
+app.use("/reserveinvites", require(__dirname + "/routes/reserve-invites"))
+
+
+
+
+
 app.use("/product", require(__dirname + "/routes/product"));
 app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
