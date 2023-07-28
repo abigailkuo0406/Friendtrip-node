@@ -7,7 +7,6 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
-
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 
@@ -41,8 +40,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
-
-
+app.use(
+  "/show-official-itinerary",
+  require(__dirname + "/routes/official-itinerary.js")
+);
 
 //照片上傳（單張）
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
