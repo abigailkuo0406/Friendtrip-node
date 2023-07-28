@@ -78,12 +78,24 @@ app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
 });
 
 //自訂行程-儲存景點行程
-// app.post("/save-view"),(req,res)=>{
-//   console.log(req.body)
-//   res.json(req,res)
-// }
-
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
+
+
+// app.get('/try-name', async (req, res)=>{
+//   const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id`);
+//   res.json(rows);
+// });
+
+app.get('/try-name', async (req, res)=>{
+
+  const itin_member_id = req.itin_member_id;
+  const sql = `SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=?`;
+  const[rows]=await db.query(sql,[itin_member_id]);
+
+  const name=rows.map((row)=>row.name)
+  console.log(name)
+  return res.json(name)
+});
 
 
 

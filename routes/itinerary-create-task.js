@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     page: 1,
     rows: [],
   };
-  console.log('this one')
+  console.log("this one");
   const perPage = 5; // 每頁有5筆
 
   let page = req.query.page ? parseInt(req.query.page) : 1;
@@ -47,8 +47,6 @@ router.get("/", async (req, res) => {
   return res.json(output);
 });
 
-
-
 // 新增資料的功能
 router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查的欄位
@@ -70,17 +68,26 @@ router.post("/", multipartParser, async (req, res) => {
   res.json({
     result,
     postData: req.body,
-  })});
-
- 
-  // 刪除行程紀錄資料的API
-router.delete("/:itin_id", async (req, res) => {
-    const { itin_id } = req.params;
-    const sql = `DELETE FROM itinerary WHERE itin_id=?`;
-    const [result] = await db.query(sql, [itin_id]);
-    res.json({ ...result, itin_id })
+  });
 });
 
+// 刪除行程紀錄資料的API
+router.delete("/:itin_id", async (req, res) => {
+  const { itin_id } = req.params;
+  const sql = `DELETE FROM itinerary WHERE itin_id=?`;
+  const [result] = await db.query(sql, [itin_id]);
+  res.json({ ...result, itin_id });
+});
 
+router.get("/member-itinerary-names", async (req, res) => {
+  
+  const memberId = req.memberId;
+
+  const sql = `SELECT name FROM itinerary WHERE itin_member_id=?`;
+  const[rows]=await db.query(sql,[memberId]);
+
+  const name=rows.map((row)=>row.name)
+  return res.json(name)
+});
 
 module.exports = router;
