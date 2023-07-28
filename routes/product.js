@@ -208,9 +208,9 @@ router.get("/:product_post", async (req, res) => {
 
 router.post("/cart/checking", async (req, res) => {
   const member_id = req.body.member;
-  const checking_sql = `SELECT cart.*,products.* FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true}`;
+  const checking_sql = `SELECT cart.*, member.* ,products.* FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true} INNER JOIN member ON cart.member_id = member.member_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true}`;
   const [rows] = await db.query(checking_sql);
   res.json({ all: rows });
 });
-
+/**/
 module.exports = router;
