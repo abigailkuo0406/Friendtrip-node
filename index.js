@@ -75,7 +75,7 @@ app.get("/", (req, res) => {
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
 app.use("/restaurant", require(__dirname + "/routes/restaurant"));
 app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
-
+app.use("/product", require(__dirname + "/routes/product"));
 app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
@@ -90,9 +90,21 @@ app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
 
 //連線db
 app.get("/try-db", async (req, res) => {
-  const [rows] = await db.query("SELECT * FROM `itinerary` LIMIT 6");
+  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1");
   res.json(rows);
 });
+
+// 自訂行程-建立行程表單
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+);
+
+//自訂行程-上傳照片
+// app.post("/try-previw",upload.single('img'),(req,res)=>{
+//   console.log(req.file)
+//   res.json(req.file)
+// })
 
 // 自訂行程-建立行程表單
 app.use(
@@ -182,7 +194,6 @@ app.post("/login", async (req, res) => {
 
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
-app.use("/product", require(__dirname + "/routes/product"));
 
 //自訂404頁面
 app.use((req, res) => {
