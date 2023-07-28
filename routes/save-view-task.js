@@ -45,34 +45,49 @@ router.get("/", async (req, res) => {
   return res.json(output);
 });
 
-// 新增資料的功能
-router.post("/", multipartParser, async (req, res) => {
+// 處理前端發送的陣列物件，新增行程
+router.post("/", multipartParser,  (req, res) => {
+ 
+   const data=req.body
 
-    console.log('req＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝>>>',req.body)
-  // TODO: 要檢查的欄位
+  if(!data || !Array.isArray(data)){
+    return res.status(400).json({error:'無效的請求數據'})
+  }
+  console.log('req＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝>>>',req.body)
+
+ // 在資料庫中逐個儲存陣列物件
+data.forEach((item)=>{
   const sql =
-    "INSERT INTO `itinerary_details` " +
-    "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
-    "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+  "INSERT INTO `itinerary_details` " +
+  "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
+  "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+  const values=[
+    item.itin_id,
+    item.itin_order,
+    item.formatted_address,
+    item.lat,
+    item.lng,
+    item.name,
+    item.phone_number,
+    '"'+item.weekday_text+'"',
+    item.startdatetime]
 
-  const weekday=req.body[0].weekday_text;
+    db.query(sql,values,(error,result)=>{
+      if(error){
+        console.error('資料儲存失敗',error)
+      }else{
+        console.log('資料儲存成功！')
+      }
+    })
 
-//TODO: foreach寫進資料庫
-  const [result] = await db.query(sql, [
-    req.body[0].itin_id,
-    req.body[0].itin_order,
-    req.body[0].formatted_address,
-    req.body[0].lat,
-    req.body[0].lng,
-    req.body[0].name,
-    req.body[0].phone_number,
-    '"'+req.body[0].weekday_text+'"',
-    req.body[0].startdatetime,
-  ]);
-  res.json({
-    result,
-    postData: req.body,
-  });
-});
+
+
+
+  })
+})
+
+
+
+
 
 module.exports = router;
