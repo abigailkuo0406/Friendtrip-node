@@ -53,63 +53,40 @@ const getListData = async (req) => {
 };
 
 // 新增資料的功能
-// router.post("/add", multipartParser, async (req, res) => {
-//   // TODO: 要檢查欄位資料
-
-//   const sql =
-//     "INSERT INTO `member`" +
-//     "(`member_id`, `email`, `password`, `images`, `member_name`, `member_birth`, `id_number`, `gender`, `location`, `height`, `weight`, `zodiac`, `bloodtype`, `smoke`, `alchohol`, `education_level`, `job`, `profile`, `mobile`, `create_at`)" +
-//     " VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-//   let birthday = dayjs(req.body.member_birth);
-//   if (birthday.isValid()) {
-//     birthday = birthday.format("YYYY-MM-DD");
-//   } else {
-//     birthday = null;
-//   }
-
-//   const [result] = await db.query(sql, [
-//     req.body.member_id,
-//     req.body.email,
-//     req.body.password,
-//     req.body.images,
-//     req.body.member_name,
-//     birthday,
-//     req.body.id_number,
-//     req.body.gender,
-//     req.body.location,
-//     req.body.height,
-//     req.body.weight,
-//     req.body.zodiac,
-//     req.body.bloodtype,
-//     req.body.smoke,
-//     req.body.alchohol,
-//     req.body.education_level,
-//     req.body.job,
-//     req.body.profile,
-//     req.body.mobile,
-//   ]);
-
-//   res.json({
-//     result,
-//     postData: req.body,
-//   });
-// });
-
-/*測試用新增API */
-
 router.post("/add", multipartParser, async (req, res) => {
   // TODO: 要檢查欄位資料
 
   const sql =
-    "INSERT INTO `test`" +
-    "(`email`,`height`, `create_at`)" +
-    " VALUES ( ?, ?, NOW())";
- 
+    "INSERT INTO `member`" +
+    "(`member_id`, `email`, `password`, `images`, `member_name`, `member_birth`, `id_number`, `gender`, `location`, `height`, `weight`, `zodiac`, `bloodtype`, `smoke`, `alchohol`, `education_level`, `job`, `profile`, `mobile`, `create_at`)" +
+    " VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+  let birthday = dayjs(req.body.member_birth);
+  if (birthday.isValid()) {
+    birthday = birthday.format("YYYY-MM-DD");
+  } else {
+    birthday = null;
+  }
 
   const [result] = await db.query(sql, [
+    req.body.member_id,
     req.body.email,
+    req.body.password,
+    req.body.images,
+    req.body.member_name,
+    birthday,
+    req.body.id_number,
+    req.body.gender,
+    req.body.location,
     req.body.height,
-    
+    req.body.weight,
+    req.body.zodiac,
+    req.body.bloodtype,
+    req.body.smoke,
+    req.body.alchohol,
+    req.body.education_level,
+    req.body.job,
+    req.body.profile,
+    req.body.mobile,
   ]);
 
   res.json({
@@ -117,7 +94,6 @@ router.post("/add", multipartParser, async (req, res) => {
     postData: req.body,
   });
 });
-
 
 // 修改資料的 API
 router.put("/:sid", async (req, res) => {
