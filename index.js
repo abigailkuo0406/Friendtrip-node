@@ -80,29 +80,17 @@ app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
 //自訂行程-儲存景點行程
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
 
-
-// app.get('/try-name', async (req, res)=>{
-//   const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id`);
-//   res.json(rows);
-// });
-
+//自訂行程-安排行程讀取最新行程名稱
 app.get('/try-name', async (req, res)=>{
-
-  const itin_member_id = req.itin_member_id;
-  const sql = `SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=?`;
-  const[rows]=await db.query(sql,[itin_member_id]);
-
-  const name=rows.map((row)=>row.name)
-  console.log(name)
-  return res.json(name)
+  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `,[req.member_id])
+  res.json(rows);
 });
-
 
 
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
-app.post("/login", async (req, res) => {
+app.post("/login", async (req, res) =>  {
   const output = {
     success: false,
     code: 0,
