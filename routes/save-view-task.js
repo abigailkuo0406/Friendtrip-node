@@ -62,7 +62,7 @@ data.forEach((item)=>{
   "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
   "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
   const values=[
-    item.itin_id,
+    item.itin_details_id,
     item.itin_order,
     item.formatted_address,
     item.lat,

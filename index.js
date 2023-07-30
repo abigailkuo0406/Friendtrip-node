@@ -85,6 +85,16 @@ app.get('/try-name', async (req, res)=>{
   const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `,[req.member_id])
   res.json(rows);
 });
+//自訂行程-取得該會員最新行程編號
+app.get('/get-itin_id', async (req, res)=>{
+
+  const itin_member = req.query.itin_member;
+  console.log('itin_member=>',itin_member)
+
+  const [result] = await db.query(`SELECT itin_id FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
+  console.log('result intin_id=>',result)
+  res.json(result);
+});
 
 
 // 登入
