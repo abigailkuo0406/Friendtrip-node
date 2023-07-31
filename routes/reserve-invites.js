@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
         FROM reserve
         LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id
         LEFT JOIN member ON invite_member.iv_member_id=member.member_id
-        WHERE reserve_member_id=3`;
+        WHERE reserve_member_id=25`;
   [rows] = await db.query(sql);
   //   }
 
