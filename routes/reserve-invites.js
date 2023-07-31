@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
   //     if (page > totalPages) {
   //       return res.redirect(req.baseUrl + "?page=" + totalPages);
   //     }
-  const sql = ` SELECT reserveId, reserve_member_id ,invite_id ,iv_member_id,images
+  const sql = ` SELECT reserveId, reserve_member_id ,invite_id ,iv_member_id,images,member_name
         FROM reserve
         LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id
         LEFT JOIN member ON invite_member.iv_member_id=member.member_id

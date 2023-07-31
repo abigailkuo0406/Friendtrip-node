@@ -34,10 +34,9 @@ const getListData = async (req) => {
     if (page > totalPages) {
       return res.redirect(req.baseUrl + "?page=" + totalPages);
     }
-    const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,invite_id ,iv_member_id 
+    const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
-        LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id
         WHERE reserve_member_id=25
         LIMIT ${perPage * (page - 1)}, ${perPage}`;
     [rows] = await db.query(sql);
