@@ -117,25 +117,4 @@ router.put("/:member_id", async (req, res) => {
   });
 });
 
-// 刪除資料的 API
-router.delete("/:member_id", async (req, res) => {
-  const { member_id } = req.params;
-
-  const sql = `DELETE FROM member_id WHERE member_id=?`;
-  const [result] = await db.query(sql, [member_id]);
-
-  res.json({ ...result, member_id });
-  /*
-  {
-      "fieldCount": 0,
-      "affectedRows": 1,
-      "insertId": 0,
-      "info": "",
-      "serverStatus": 2,
-      "warningStatus": 0,
-      "member_id": "123"
-  }
-  */
-});
-
 module.exports = router;
