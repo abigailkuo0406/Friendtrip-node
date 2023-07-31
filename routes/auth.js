@@ -99,6 +99,7 @@ router.post("/admin", async (req, res) => {
   output.data = {
     member_id: rows[0].member_id,
     email: rows[0].email,
+    password: rows[0].password,
     member_name: rows[0].member_name,
     images: rows[0].member_id,
     member_birth: rows[0].member_birth,
