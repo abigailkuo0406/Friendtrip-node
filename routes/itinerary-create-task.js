@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     rows: [],
   };
   console.log("this one");
-  const perPage = 5; // 每頁有5筆
+  const perPage = 4; // 每頁有5筆
 
   let page = req.query.page ? parseInt(req.query.page) : 1;
   //  頁數
