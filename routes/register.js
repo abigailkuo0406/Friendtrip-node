@@ -66,7 +66,6 @@ router.post("/add", multipartParser, async (req, res) => {
   } else {
     birthday = null;
   }
-  console.log(birthday);
 
   const [result] = await db.query(sql, [
     req.body.member_id,
@@ -89,6 +88,7 @@ router.post("/add", multipartParser, async (req, res) => {
     req.body.profile,
     req.body.mobile,
   ]);
+
   res.json({
     result,
     postData: req.body,

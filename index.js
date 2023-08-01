@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
 app.use("/products", require(__dirname + "/routes/example")); //主程式掛API示範
 
 //照片上傳（單張）
-app.post("/try-upload", upload.single("avatar"), (req, res) => {
+app.post("/preview", upload.single("preview"), (req, res) => {
   console.log(req.file);
   res.json(req.file);
 });
