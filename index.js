@@ -91,7 +91,7 @@ app.get('/get-itin_id', async (req, res)=>{
   const itin_member = req.query.itin_member;
   console.log('itin_member=>',itin_member)
 
-  const [result] = await db.query(`SELECT itin_id FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
+  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
   console.log('result intin_id=>',result)
   res.json(result);
 });
