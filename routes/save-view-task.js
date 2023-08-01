@@ -7,11 +7,11 @@ const multipartParser = previewInitImg.none();
 
 router.get("/", async (req, res) => {
   const itin_member = req.query.itin_member;
-  console.log('itin_member=>',itin_member)
+  // console.log('itin_member=>',itin_member)
   const sql=`SELECT d.*, i.name AS itin_name,i.date,i.coverPhoto,i.itin_member_id FROM itinerary AS i LEFT JOIN itinerary_details AS d  ON d.itin_id = i.itin_id where i.itin_id=? ORDER BY d.itin_order ASC`;
-  console.log(sql)
+  // console.log(sql)
   const [rows] = await db.query(sql,[itin_member]);
-  console.log('result intin_id=>',rows)
+  // console.log('result intin_id=>',rows)
   return res.json(rows);
   // 給予預設值
   // let output = {
@@ -56,68 +56,111 @@ router.get("/", async (req, res) => {
 });
 
 // 處理前端發送的陣列物件，新增行程
-router.post("/", multipartParser,  (req, res) => {
- 
-   const data=req.body
-
-  if(!data || !Array.isArray(data)){
-    return res.status(400).json({error:'無效的請求數據'})
-  }
-  console.log('req＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝>>>',req.body)
-
-
-
-  //billy delete before insert
-  const sql = `DELETE FROM itinerary_details WHERE itin_id=?`;
-  console.log('itin_id==>',data[0].itin_id)
-  const itin_id= data[0].itin_id;
-  console.log('delete_sql =>',itin_id)
-  //const [result] = db.query(sql, [itin_id]);
-
+// router.post("/", multipartParser,  (req, res) => {
+//    const data=req.body
+//   if(!data || !Array.isArray(data)){
+//     return res.status(400).json({error:'無效的請求數據'})
+//   }
+//   console.log('req＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝>>>',req.body)
+//   //billy delete before insert
+//   const sql = `DELETE FROM itinerary_details WHERE itin_id=?`;
+//   console.log('itin_id==>',data[0].itin_id)
+//   const itin_id= data[0].itin_id;
+//   console.log('delete_sql =>',itin_id)
+//   // const [result] = db.query(sql, [itin_id]);
     
- // 在資料庫中逐個儲存陣列物件
-data.forEach((item)=>{
-  const sql =
-  "INSERT INTO `itinerary_details` " +
-  "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
-  "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
-  const values=[
-    item.itin_id,
-    item.itin_order,
-    item.formatted_address,
-    item.lat,
-    item.lng,
-    item.name,
-    item.phone_number,
-    '"'+item.weekday_text+'"',
-    item.startdatetime]
+//  // 在資料庫中逐個儲存陣列物件
+// data.forEach((item)=>{
+//   const sql =
+//   "INSERT INTO `itinerary_details` " +
+//   "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
+//   "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+//   const values=[
+//     item.itin_id,
+//     item.itin_order,
+//     item.formatted_address,
+//     item.lat,
+//     item.lng,
+//     item.name,
+//     item.phone_number,
+//     '"'+item.weekday_text+'"',
+//     item.startdatetime]
 
-    db.query(sql,values,(error,result)=>{
-      if(error){
-        console.error('資料儲存失敗',error)
-      }else{
-        console.log('資料儲存成功！')
-      }
+//     db.query(sql,values,(error,result)=>{
+//       if(error){
+//         console.error('資料儲存失敗',error)
+//       }else{
+//         console.log('資料儲存成功！')
+//       }
+//     })
+//   })
+// })
+
+router.post("/", multipartParser, async (req, res) => {
+  const data = req.body;
+  //如果data不是真的或者data不是個陣列
+  if (!data || !Array.isArray(data)) {
+    return res.status(400).json({ error: '無效的請求數據' });
+  }
+
+    // 取得 itin_id
+    const itin_id = data[0].itin_id;
+
+    // 刪除原有的行程資料
+    const deleteSql = `DELETE FROM itinerary_details WHERE itin_id=?`;
+    await db.query(deleteSql, [itin_id]);
+
+    // 在資料庫中逐個儲存陣列物件
+    // const insertSql = `
+    //   INSERT INTO \`itinerary_details\`
+    //   (\`itin_id\`, \`itin_order\`, \`formatted_address\`, \`lat\`, \`lng\`, \`name\`, \`phone_number\`, \`weekday_text\`, \`startdatetime\`, \`create_at\`)
+    //   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    // `;
+    const insertSql =
+    "INSERT INTO `itinerary_details` " +
+      "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
+      "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+
+
+     // 在資料庫中逐個儲存陣列物件
+    const insertPromises=data.map(item=>{
+
+      const values = [
+        item.itin_id,
+        item.itin_order,
+        item.formatted_address,
+        item.lat,
+        item.lng,
+        item.name,
+        item.phone_number,
+        '"'+item.weekday_text+'"',
+        item.startdatetime
+      ];
+      return db.query(insertSql, values);
     })
-  })
+
+    try {
+      // 使用 Promise.all 來等待所有的新增操作完成後才會解析
+      // Promise.all 方法接收一個Promise物件陣列作為參數
+      await Promise.all(insertPromises);
+      console.log('資料儲存成功！');
+      res.json({ success: true });
+    } catch (error) {
+      console.error('資料儲存失敗', error);
+    }
+});
 
 
- 
-
-})
-
-
-
-
+//編輯
 router.get("/edit", async (req, res) => {
   const itin_member = req.query.itin_member;
   console.log('itin_member=>',itin_member)
+
   const sql=`SELECT * FROM itinerary_details WHERE itin_id=? ORDER BY itin_order ASC`;
   const [rows] = await db.query(sql,[itin_member]);
   return res.json(rows);
 
 })
-
 
 
 
