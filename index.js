@@ -1,3 +1,4 @@
+const fs = require('fs');
 console.log("arg2", process.argv[2]);
 if (process.argv[2] === "production") {
   require("dotenv").config({
@@ -12,6 +13,7 @@ const upload = require(__dirname + "/modules/img-upload");
 
 // 建立自訂行程照片上傳到指定資料夾
 const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
+
 
 // 1.引入express
 const express = require("express");
@@ -76,6 +78,39 @@ app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
   console.log(req.file);
   res.json(req.file);
 });
+
+// const fs = require('fs');
+// app.post('/upload', (req, res) => {
+//   const { photoUrl } = req.body;
+//   // 在這裡對photoUrl進行處理，可以將它存儲到資料庫或其他位置
+//   const filePath = './public/img/view-img';
+//   fs.writeFileSync(filePath, photoUrl, 'utf8');
+//   // 假設後端成功處理了照片URL，返回成功的回應給前端
+//   res.json({ success: true });
+// });
+
+//自訂行程-上傳照片
+app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
+
+app.post('/upload', previewInitImg.single("photoUrl"),(req, res) => {
+  // const fileName = 'my-photo.jpg'; // 動態生成的檔案名稱
+
+  
+  const filename =`${fileExtension}`;
+  const filePath = path.join('./public/img/view-img', filename);
+  // const filePath = `./public/img/view-img/fileName`;
+  const { photoUrl } = req.body;
+  
+  // 在這裡對photoUrl進行處理，可以將它存儲到資料庫或其他位置
+  console.log('photoUrl====>',photoUrl)
+  fs.writeFileSync(filePath, photoUrl, 'utf8')
+  // 假設後端成功處理了照片URL，返回成功的回應給前端
+  res.json({ success: true });
+});
+
 
 //自訂行程-儲存景點行程
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
