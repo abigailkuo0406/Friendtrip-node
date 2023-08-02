@@ -60,6 +60,33 @@ router.get("/", async (req, res) => {
   res.json(output);
 });
 
+router.get("/:reserveRid", async (req, res) => {
+  const output = {
+    success: false,
+    error: "",
+    row: null,
+  };
+
+  const reserveRid = parseInt(req.params.reserveRid) || 0;
+  if (!reserveRid) {
+    // 沒有 sid
+    output.error = "沒有 rid !";
+  } else {
+    const sql = `SELECT * FROM reserve WHERE reserveId=${reserveRid}`;
+    const [rows] = await db.query(sql);
+
+    if (rows.length) {
+      output.success = true;
+      output.row = rows[0];
+    } else {
+      // 沒有資料
+      output.error = "沒有資料 !";
+    }
+  }
+  res.json(output);
+});
+
+
 router.put("/edit", multipartParser, async (req, res) => {
   const reserveRid = req.body.reserve_id;
   const sql = `UPDATE reserve SET reserve_member_id=?,
