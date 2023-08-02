@@ -118,8 +118,8 @@ router.post("/", multipartParser, async (req, res) => {
     // `;
     const insertSql =
     "INSERT INTO `itinerary_details` " +
-      "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`, `weekday_text`, `startdatetime`,`create_at`) " +
-      "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+      "(`itin_id`, `itin_order`, `formatted_address`, `lat`, `lng`, `name`, `phone_number`,`photo_url`, `weekday_text`, `startdatetime`,`create_at`) " +
+      "VALUES (?,?,?,?,?,?,?,?,?,?,NOW())";
 
 
      // 在資料庫中逐個儲存陣列物件
@@ -133,6 +133,7 @@ router.post("/", multipartParser, async (req, res) => {
         item.lng,
         item.name,
         item.phone_number,
+        item.photo_url,
         '"'+item.weekday_text+'"',
         item.startdatetime
       ];
