@@ -9,6 +9,7 @@ if (process.argv[2] === "production") {
 
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload")
+const previewForumPic = require(__dirname + "/modules/forum-img-preview")
 
 // 1.引入express
 const express = require("express")
@@ -22,7 +23,7 @@ const sessionStore = new MysqlStore({}, db)
 
 // 2.取用express
 const app = express()
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // 3.取用cors
@@ -42,11 +43,16 @@ app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`)
 })
-app.use("/twoBooks", require(__dirname + "/routes/example")) //主程式掛API示範
-app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
-app.use("/leftMsg", require(__dirname + "/routes/forum-posts"))
-
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) // why have to use app.use ???
+//app.get("/show-forum-posts", require(__dirname + "/routes/forum-posts")) // why have to use app.use ???
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
+
+app.post("/try-forum-preview", previewForumPic.single("img"), (req, res) => {
+  console.log(req.file)
+  res.json(req.file)
+})
+
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
   console.log(req.file)
   res.json(req.file)

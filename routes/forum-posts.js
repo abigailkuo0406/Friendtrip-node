@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
   //   return res.json(output);
   // }
 
-  let where = " WHERE 1 "
+  let where = "WHERE 1"
   // if (keyword) {
   //   const kw_escaped = db.escape("%" + keyword + "%");
   //   where += ` AND (
@@ -43,7 +43,22 @@ router.get("/", async (req, res) => {
     //   output.redirect = req.baseUrl + "?page=" + totalPages;
     //   return res.json(output);
     // }
-    const sql = ` SELECT * FROM posts INNER JOIN media_attachments on posts.post_id = media_attachments.post_id INNER JOIN users on posts.user_id = users.user_id `
+    const sql = `SELECT
+    posts.post_id,
+    posts.member_id,
+    posts.img,
+    posts.content,
+    posts.created_at,
+    media_attachments.file_url
+FROM
+    posts
+LEFT JOIN media_attachments ON posts.post_id = media_attachments.post_id
+LEFT JOIN member ON posts.member_id = member.member_id
+ORDER BY
+    posts.created_at
+DESC`
+
+    // const sql = `SELECT * FROM posts INNER JOIN media_attachments on posts.post_id = media_attachments.post_id INNER JOIN member on posts.member_id = member.member_id `
     // ${where} LIMIT ${perPage * (page - 1)}, ${perPage}
     ;[rows] = await db.query(sql)
   }
