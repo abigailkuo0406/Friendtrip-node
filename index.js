@@ -43,8 +43,8 @@ app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`)
 })
-app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) // why have to use app.use ???
-//app.get("/show-forum-posts", require(__dirname + "/routes/forum-posts")) // why have to use app.use ???
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts"))
+
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
 
