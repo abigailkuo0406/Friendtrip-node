@@ -22,7 +22,7 @@ const getListData = async (req) => {
     return res.redirect(req.baseUrl);
   }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=25`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=997`;
   const [[{ totalRows }]] = await db.query(t_sql);
 
   let totalPages = 0;
@@ -37,8 +37,9 @@ const getListData = async (req) => {
     const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
-        WHERE reserve_member_id=25
-        LIMIT ${perPage * (page - 1)}, ${perPage}`;
+        WHERE reserve_member_id=997
+        ORDER BY reserveId DESC
+        LIMIT ${perPage * (page - 1)}, ${perPage} `;
     [rows] = await db.query(sql);
   }
 
@@ -72,7 +73,10 @@ router.get("/:reserveRid", async (req, res) => {
     // 沒有 sid
     output.error = "沒有 rid !";
   } else {
-    const sql = `SELECT * FROM reserve WHERE reserveId=${reserveRid}`;
+    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
+    FROM reserve
+    JOIN restaurant ON reserve.rest_id = restaurant.RestID
+    WHERE reserveId=${reserveRid}`;
     const [rows] = await db.query(sql);
 
     if (rows.length) {
