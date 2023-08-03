@@ -73,44 +73,55 @@ app.use(
   require(__dirname + "/routes/itinerary-create-task")
 );
 
-//自訂行程-上傳照片
+//自訂行程-上傳照片(建立表單)
 app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
   console.log(req.file);
   res.json(req.file);
 });
 
-// const fs = require('fs');
-// app.post('/upload', (req, res) => {
-//   const { photoUrl } = req.body;
-//   // 在這裡對photoUrl進行處理，可以將它存儲到資料庫或其他位置
-//   const filePath = './public/img/view-img';
-//   fs.writeFileSync(filePath, photoUrl, 'utf8');
-//   // 假設後端成功處理了照片URL，返回成功的回應給前端
-//   res.json({ success: true });
-// });
+const request = require('request');
+const path = require('path');
 
-//自訂行程-上傳照片
-app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
-  console.log(req.file);
-  res.json(req.file);
+app.post('/upload-viewPhoto', (req, res) => {
+  const output = {
+    success: false,
+    code: 0,
+    error: "",
+  };
+  const photoName = req.body.photoName+'.jpg';
+  const imageUrl = req.body.photoUrl;
+
+  const downloadDir = path.join(__dirname, '/public/img/view-img');
+      // 確保 download 資料夾存在，如果不存在就創建它
+  if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir);
+  }
+  // 從 URL 下載圖片並保存到 download 資料夾中
+
+  const fileName = path.basename(photoName); // 從 URL 中取得檔案名稱
+  const filePath = path.join(downloadDir, fileName); // 拼接儲存的完整路徑
+  if (! fs.existsSync(filePath)) {
+    // 使用 request 套件進行下載
+    request(imageUrl)
+      .on('error', (err) => {
+        console.error('下載圖片時發生錯誤：', err);
+        output.code = 333;
+        output.error = "下載圖片時發生錯誤：";
+        return res.json(output);
+      })
+      .pipe(fs.createWriteStream(filePath))
+      .on('close', () => {
+        console.log(fileName,'圖片下載完成！');
+        output.success = true;
+        return res.json(output);
+      });
+  }else{
+    console.log(fileName,'圖片已存在，不需下載！');
+    output.success = true;
+    return res.json(output);
+  }
+
 });
-
-app.post('/upload', previewInitImg.single("photoUrl"),(req, res) => {
-  // const fileName = 'my-photo.jpg'; // 動態生成的檔案名稱
-
-  
-  const filename =`${fileExtension}`;
-  const filePath = path.join('./public/img/view-img', filename);
-  // const filePath = `./public/img/view-img/fileName`;
-  const { photoUrl } = req.body;
-  
-  // 在這裡對photoUrl進行處理，可以將它存儲到資料庫或其他位置
-  console.log('photoUrl====>',photoUrl)
-  fs.writeFileSync(filePath, photoUrl, 'utf8')
-  // 假設後端成功處理了照片URL，返回成功的回應給前端
-  res.json({ success: true });
-});
-
 
 //自訂行程-儲存景點行程
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
