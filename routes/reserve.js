@@ -61,7 +61,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:reserveRid", async (req, res) => {
-  const output = {
+  let output = {
     success: false,
     error: "",
     row: null,
@@ -78,6 +78,12 @@ router.get("/:reserveRid", async (req, res) => {
     if (rows.length) {
       output.success = true;
       output.row = rows[0];
+      output.row.reserve_date = dayjs(output.row.reserve_date).format("YYYY-MM-DD");
+      // delete i.created_at;
+      output = {
+        ...output,
+      };
+
     } else {
       // 沒有資料
       output.error = "沒有資料 !";
