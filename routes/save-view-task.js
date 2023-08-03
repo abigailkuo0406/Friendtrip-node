@@ -1,9 +1,12 @@
 const express = require("express");
+const path = require('path');
+const fs = require('fs')
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
 // const upload = require(__dirname + "/../modules/img-upload");
 const previewInitImg = require(__dirname + "/../modules/itinerary-img-preview");
 const multipartParser = previewInitImg.none();
+const photoDirectory = path.join(__dirname, '../public/img/view-img')
 
 router.get("/", async (req, res) => {
   const itin_member = req.query.itin_member;
@@ -161,6 +164,26 @@ router.get("/edit", async (req, res) => {
   const [rows] = await db.query(sql,[itin_member]);
   return res.json(rows);
 
+})
+
+
+router.get("/photos/:photoName",(req,res)=>{
+
+  const photoName=req.params.photoName;
+  const photoPath=path.join(photoDirectory, photoName);
+  if(fs.existsSync(photoPath)){
+    fs.readFile(photoPath,(err,data)=>{
+      if(err){
+        console.log('照片讀取失敗',err);
+      return res.status(500).json({error:'照片讀取失敗'})
+     }
+     res.setHeader('Content-Type', 'image/jpg');
+     res.end(data)
+     console.log('照片讀取成功',data)//讀取照片二進位內容
+    })
+  } else{
+    res.status(404).json({error:'找不到照片'})
+  }
 })
 
 

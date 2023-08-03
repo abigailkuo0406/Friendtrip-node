@@ -79,14 +79,10 @@ router.delete("/:itin_id", async (req, res) => {
   res.json({ ...result, itin_id });
 });
 
-
-// router.get("/member-itinerary-names/:member_id", async (req, res) => {
-//   console.log('sql',sql)
-//   const { member_id } = req.params;
-//   const sql = `SELECT name,itin_member_id FROM itinerary WHERE itin_member_id＝?`;
-//   const [result] = await db.query(sql, [member_id]);
-//   const name = rows.map((row) => row.name);
-//   return res.json(name);
-// });
-
+//篩選公開與不公開
+router.get("/public-itineraries", async (req, res) => {
+  const sql = `SELECT * FROM itinerary WHERE public ='公開'`;
+  const [rows] = await db.query(sql);
+  return res.json(rows);
+});
 module.exports = router;
