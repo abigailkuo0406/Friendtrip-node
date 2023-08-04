@@ -1,4 +1,5 @@
-console.log("arg2", process.argv[2])
+const fs = require('fs');
+console.log("arg2", process.argv[2]);
 if (process.argv[2] === "production") {
   require("dotenv").config({
     path: __dirname + "/production.env"
@@ -12,6 +13,7 @@ const upload = require(__dirname + "/modules/img-upload")
 
 // 建立自訂行程照片上傳到指定資料夾
 const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
+
 
 // 1.引入express
 const express = require("express")
@@ -112,34 +114,84 @@ app.use(
   require(__dirname + "/routes/itinerary-create-task")
 );
 
-//自訂行程-上傳照片
-// app.post("/try-previw",upload.single('img'),(req,res)=>{
-//   console.log(req.file)
-//   res.json(req.file)
-// })
+//自訂行程-上傳照片(建立表單)
+app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
 
-// 自訂行程-建立行程表單
-app.use(
-  "/custom-itinerary",
-  require(__dirname + "/routes/itinerary-create-task")
-);
+const request = require('request');
+const path = require('path');
 
-//自訂行程-上傳照片
-// app.post("/try-previw",upload.single('img'),(req,res)=>{
-//   console.log(req.file)
-//   res.json(req.file)
-// })
+app.post('/upload-viewPhoto', (req, res) => {
+  const output = {
+    success: false,
+    code: 0,
+    error: "",
+  };
+  const photoName = req.body.photoName+'.jpg';
+  const imageUrl = req.body.photoUrl;
 
+  const downloadDir = path.join(__dirname, '/public/img/view-img');
+      // 確保 download 資料夾存在，如果不存在就創建它
+  if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir);
+  }
+  // 從 URL 下載圖片並保存到 download 資料夾中
+
+  const fileName = path.basename(photoName); // 從 URL 中取得檔案名稱
+  const filePath = path.join(downloadDir, fileName); // 拼接儲存的完整路徑
+  if (! fs.existsSync(filePath)) {
+    // 使用 request 套件進行下載
+    request(imageUrl)
+      .on('error', (err) => {
+        console.error('下載圖片時發生錯誤：', err);
+        output.code = 333;
+        output.error = "下載圖片時發生錯誤：";
+        return res.json(output);
+      })
+      .pipe(fs.createWriteStream(filePath))
+      .on('close', () => {
+        console.log(fileName,'圖片下載完成！');
+        output.success = true;
+        return res.json(output);
+      });
+  }else{
+    console.log(fileName,'圖片已存在，不需下載！');
+    output.success = true;
+    return res.json(output);
+  }
+
+});
+
+//自訂行程-儲存景點行程
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));
 // app.use("/edit", require(__dirname + "/routes/edit"));
 app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 
+//自訂行程-安排行程讀取最新行程名稱
+app.get('/try-name', async (req, res)=>{
+  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `,[req.member_id])
+  res.json(rows);
+});
+//自訂行程-取得該會員最新行程編號
+app.get('/get-itin_id', async (req, res)=>{
+
+  const itin_member = req.query.itin_member;
+  console.log('itin_member=>',itin_member)
+
+  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
+  console.log('result intin_id=>',result)
+  res.json(result);
+});
+
+
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
-app.post("/login", async (req, res) => {
+app.post("/login", async (req, res) =>  {
   const output = {
     success: false,
     code: 0,
