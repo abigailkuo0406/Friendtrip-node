@@ -28,6 +28,7 @@ const getListData = async (req) => {
   let totalPages = 0;
   let rows = [];
 
+  
   if (totalRows) {
     totalPages = Math.ceil(totalRows / perPage);
 
