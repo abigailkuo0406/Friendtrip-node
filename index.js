@@ -10,6 +10,7 @@ if (process.argv[2] === "production") {
 
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload")
+const previewForumPic = require(__dirname + "/modules/forum-img-preview")
 
 // 建立自訂行程照片上傳到指定資料夾
 const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
@@ -27,7 +28,7 @@ const sessionStore = new MysqlStore({}, db)
 
 // 2.取用express
 const app = express()
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // 3.取用cors
@@ -94,6 +95,7 @@ app.use("/collection", require(__dirname + "/routes/collection"));
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
 app.use("/leftMsg", require(__dirname + "/routes/forum-posts"))
 
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
 app.post("/preview", upload.single("preview"), (req, res) => {
   console.log(req.file);
