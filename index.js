@@ -90,10 +90,10 @@ app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留�
 app.use("/leftMsg", require(__dirname + "/routes/forum-posts"))
 
 //照片上傳（單張）
-app.post("/try-upload", upload.single("avatar"), (req, res) => {
-  console.log(req.file)
-  res.json(req.file)
-})
+app.post("/preview", upload.single("preview"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
 //照片上傳（多張）
 app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
   console.log(req.files)
@@ -133,6 +133,9 @@ app.use(
 app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));
+// app.use("/edit", require(__dirname + "/routes/edit"));
+app.use("/catchMember", require(__dirname + "/routes/catchMember"));
+
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());

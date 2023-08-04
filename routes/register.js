@@ -33,7 +33,7 @@ const getListData = async (req) => {
     `;
   }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM address_book ${where}`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM member_id ${where}`;
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -43,7 +43,7 @@ const getListData = async (req) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = ` SELECT * FROM address_book ${where} LIMIT ${
+    const sql = ` SELECT * FROM member_id ${where} LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
     [rows] = await db.query(sql);
@@ -96,20 +96,20 @@ router.post("/add", multipartParser, async (req, res) => {
 });
 
 // 修改資料的 API
-router.put("/:sid", async (req, res) => {
-  let { sid } = req.params;
+router.put("/:member_id", async (req, res) => {
+  let { member_id } = req.params;
   // 先找到那一筆資料
-  sid = parseInt(sid);
+  member_id = parseInt(member_id);
   const [rows] = await db.query(
-    `SELECT * FROM address_book WHERE sid='${sid}' `
+    `SELECT * FROM member WHERE member_id='${member_id}' `
   );
   if (!rows.length) {
     return res.json({ msg: "編號錯誤" });
   }
   let row = { ...rows[0], ...req.body };
 
-  const sql = `UPDATE \`address_book\` SET ? WHERE sid=?`;
-  const [result] = await db.query(sql, [row, sid]);
+  const sql = `UPDATE \`member\` SET ? WHERE member_id=?`;
+  const [result] = await db.query(sql, [row, member_id]);
 
   res.json({
     success: !!result.changedRows,
@@ -118,13 +118,13 @@ router.put("/:sid", async (req, res) => {
 });
 
 // 刪除資料的 API
-router.delete("/:sid", async (req, res) => {
-  const { sid } = req.params;
+router.delete("/:member_id", async (req, res) => {
+  const { member_id } = req.params;
 
-  const sql = `DELETE FROM address_book WHERE sid=?`;
-  const [result] = await db.query(sql, [sid]);
+  const sql = `DELETE FROM member_id WHERE member_id=?`;
+  const [result] = await db.query(sql, [member_id]);
 
-  res.json({ ...result, sid });
+  res.json({ ...result, member_id });
   /*
   {
       "fieldCount": 0,
@@ -133,7 +133,7 @@ router.delete("/:sid", async (req, res) => {
       "info": "",
       "serverStatus": 2,
       "warningStatus": 0,
-      "sid": "123"
+      "member_id": "123"
   }
   */
 });
