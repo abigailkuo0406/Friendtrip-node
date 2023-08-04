@@ -101,7 +101,7 @@ router.post("/admin", async (req, res) => {
     email: rows[0].email,
     password: rows[0].password,
     member_name: rows[0].member_name,
-    images: rows[0].member_id,
+    images: rows[0].images,
     member_birth: rows[0].member_birth,
     id_number: rows[0].id_number,
     gender: rows[0].gender,
