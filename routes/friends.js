@@ -20,6 +20,7 @@ router.get("/", async (req, res) => {
     ...output,
     totalRows,
     rows,
+    
   };
   return res.json(output);
 });
