@@ -63,7 +63,7 @@ app.get("/try-db", async (req, res) => {
 });
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));
-// app.use("/edit", require(__dirname + "/routes/edit"));
+app.use("/edit", require(__dirname + "/routes/edit"));
 app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 
 // 登入
