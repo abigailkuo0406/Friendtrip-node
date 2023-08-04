@@ -29,7 +29,8 @@ router.get("/", async (req, res) => {
     posts.member_id,
     posts.img,
     posts.content,
-    posts.created_at
+    posts.created_at,
+    posts.comment              
 FROM
     posts
 LEFT JOIN member ON posts.member_id = member.member_id
