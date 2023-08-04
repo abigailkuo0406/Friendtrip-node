@@ -88,6 +88,9 @@ app.use("/reserveinvites", require(__dirname + "/routes/reserve-invites"))
 
 
 app.use("/product", require(__dirname + "/routes/product"));
+app.use("/checkout", require(__dirname + "/routes/checkout"));
+app.use("/order", require(__dirname + "/routes/order"));
+app.use("/collection", require(__dirname + "/routes/collection"));
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
 app.use("/leftMsg", require(__dirname + "/routes/forum-posts"))
 

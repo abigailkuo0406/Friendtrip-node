@@ -54,11 +54,11 @@ router.get("/", async (req, res) => {
   return res.json(output);
 });
 
-router.post("/cart", async (req, res) => {
+router.post("/cart/read", async (req, res) => {
   const { member_id } = req.body.auth; // req.body.auth.member_id 可縮短成 member_id
   const checkAll_sql = `UPDATE cart SET cart_check = ${true} WHERE member_id = ${member_id}`;
   const [rows1] = await db.query(checkAll_sql);
-  const selectPriceAll_sql = `SELECT cart.product_num,cart.product_id, cart.cart_total,cart.cart_check, products.product_id, products.product_price FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE member_id=${member_id} ORDER BY cart.cart_created ASC`;
+  const selectPriceAll_sql = `SELECT cart.*, products.* FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE member_id=${member_id} ORDER BY cart.cart_created ASC`;
   const [rowsSelectPriceAll] = await db.query(selectPriceAll_sql);
   let totalPrice = 0.0;
   if (rowsSelectPriceAll.length > 0) {
@@ -71,15 +71,19 @@ router.post("/cart", async (req, res) => {
     });
     const setTotalPrice_sql = `UPDATE cart SET cart_total = ${totalPrice} WHERE member_id = ${member_id}`;
     const [rowsSetTotalPrice] = await db.query(setTotalPrice_sql);
-    const cart_sql = `SELECT cart.product_id, cart.member_id, cart.product_num, cart.cart_created, cart.cart_total, products.product_id, products.product_name, products.product_price, products.product_brief, products.product_main_img FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE member_id=${member_id} ORDER BY cart.cart_created ASC`;
-    const [rows5] = await db.query(cart_sql);
-    console.log("通過通過");
+    const cart_sql = `SELECT cart.*, products.* FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE member_id=${member_id} ORDER BY cart.cart_created ASC`;
+    let [rows5] = await db.query(cart_sql);
     res.json({ all: rows5 });
+  } else if (rowsSelectPriceAll.length == 0) {
+    res.json({ all: [] });
   }
 });
 
 router.post("/cart/change", async (req, res) => {
-  const product_num = req.body.value;
+  let product_num = req.body.value;
+  if (!req.body.value) {
+    product_num = 0;
+  }
   const product_id = req.body.name;
   const member_id = req.body.member;
   const cart_check = req.body.check;
@@ -116,12 +120,16 @@ router.post("/cart/change", async (req, res) => {
 router.post("/cart/delete", async (req, res) => {
   const member_id = req.body.member;
   const product_id = req.body.product;
-  const cart_delete_sql = `DELETE FROM cart WHERE member_id = ${member_id} AND product_id = ${product_id}`;
+  const delete_all = req.body.deleteAll;
+  let cart_delete_sql = `DELETE FROM cart WHERE member_id = ${member_id} AND product_id = ${product_id}`;
+  if (delete_all == true) {
+    cart_delete_sql = `DELETE FROM cart WHERE member_id = ${member_id}`;
+  }
   const [rows] = await db.query(cart_delete_sql);
   const selectPriceAll_sql = `SELECT cart.product_num,cart.product_id, cart.cart_total,cart.cart_check, products.product_id, products.product_price FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE member_id=${member_id} ORDER BY cart.cart_created ASC`;
   const [rowsSelectPriceAll] = await db.query(selectPriceAll_sql);
   let totalPrice = 0.0;
-  if (rowsSelectPriceAll.length > 0) {
+  if (rowsSelectPriceAll.length > -1) {
     rowsSelectPriceAll.forEach((e, i) => {
       if (rowsSelectPriceAll[i].cart_check == true) {
         totalPrice +=
@@ -207,10 +215,29 @@ router.get("/:product_post", async (req, res) => {
 });
 
 router.post("/cart/checking", async (req, res) => {
+  let checkingAdd_rows = [];
   const member_id = req.body.member;
-  const checking_sql = `SELECT cart.*, member.* ,products.* FROM cart INNER JOIN products ON cart.product_id = products.product_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true} INNER JOIN member ON cart.member_id = member.member_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true}`;
-  const [rows] = await db.query(checking_sql);
-  res.json({ all: rows });
+  const checkingSelect_sql = `SELECT cart.*, member.* ,products.* FROM cart
+  INNER JOIN products ON cart.product_id = products.product_id
+  INNER JOIN member ON cart.member_id = member.member_id WHERE cart.member_id=${member_id} AND cart.cart_check=${true} `;
+  const [checkingSelect_rows] = await db.query(checkingSelect_sql);
+  const timestamp = new Date().getTime();
+  let batch =
+    Math.random().toString(36).substring(2, 8) + timestamp.toString(36);
+  // const batchSelect_sql = `SELECT checking.checking_batch FROM checking
+  // WHERE checking.member_id=${member_id}`;
+  // const [batchSelect_rows] = await db.query(batchSelect_sql);
+  // if (batchSelect_rows.length > 0) {
+  //   maxBatch = batchSelect_rows.reduce((max, current) => {
+  //     return current.checking_batch > max ? current.checking_batch : max;
+  //   }, -Infinity);
+  // }
+  checkingSelect_rows.forEach(async (e, i) => {
+    let checkingAdd_sql = `INSERT INTO product_checking_item (member_id, product_id, product_num, checking_total, order_id)
+    VALUES (${e.member_id}, ${e.product_id}, ${e.product_num}, ${e.cart_total}, '${batch}')`;
+    [checkingAdd_rows] = await db.query(checkingAdd_sql);
+  });
+  res.json({ all: checkingSelect_rows, Batch: batch });
 });
 /**/
 module.exports = router;
