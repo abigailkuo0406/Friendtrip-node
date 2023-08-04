@@ -46,6 +46,9 @@ app.use("/products", require(__dirname + "/routes/example")); //主程式掛API�
 app.use("/restaurant", require(__dirname + "/routes/restaurant"));
 app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
 app.use("/product", require(__dirname + "/routes/product"));
+app.use("/checkout", require(__dirname + "/routes/checkout"));
+app.use("/order", require(__dirname + "/routes/order"));
+app.use("/collection", require(__dirname + "/routes/collection"));
 app.use("/forum", require(__dirname + "/routes/forum")); //留言板進入點
 //照片上傳（單張）
 app.post("/try-upload", upload.single("avatar"), (req, res) => {
