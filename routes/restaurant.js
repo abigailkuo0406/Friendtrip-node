@@ -7,7 +7,7 @@ const multipartParser = upload.none();
 
 
 router.get("/", async (req, res) => {
- 
+
   let output = {
     redirect: "",
     totalRows: 0,
@@ -20,8 +20,8 @@ router.get("/", async (req, res) => {
   const perPage = 2; //一頁幾筆資料
 
   //取得queryString查詢條件
-  let city = req.query.city || ""; 
-  let meal = req.query.meal || ""; 
+  let city = req.query.city || "";
+  let meal = req.query.meal || "";
 
   let page = req.query.page ? parseInt(req.query.page) : 1; //第幾頁
 
@@ -64,41 +64,15 @@ router.get("/", async (req, res) => {
     }
 
     //查詢限制筆數的資料
-    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${
-      perPage * (page - 1)
-    }, ${perPage}`;
+    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${perPage * (page - 1)
+      }, ${perPage}`;
     [rows] = await db.query(sql);
   }
-  output = { ...output, totalRows, perPage, totalPages, page, rows , jwtData: res.locals.jwtData};
+  output = { ...output, totalRows, perPage, totalPages, page, rows, jwtData: res.locals.jwtData };
   return res.json(output);
   // res.json({ totalRows, totalPages, page, perPage, rows });
 });
 
-// router.get("/:book_sid", async (req, res) => {
-//   const output = {
-//     success: false,
-//     error: "",
-//     row: null,
-//   };
-
-//   const book_sid = parseInt(req.params.book_sid) || 0;
-//   if (!book_sid) {
-//     // 沒有 sid
-//     output.error = "沒有 sid !";
-//   } else {
-//     const sql = `SELECT * FROM products WHERE sid=${book_sid}`;
-//     const [rows] = await db.query(sql);
-
-//     if (rows.length) {
-//       output.success = true;
-//       output.row = rows[0];
-//     } else {
-//       // 沒有資料
-//       output.error = "沒有資料 !";
-//     }
-//   }
-//   res.json(output);
-// });
 
 // 新增訂位資料
 router.post("/", multipartParser, async (req, res) => {

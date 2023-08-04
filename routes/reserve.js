@@ -22,7 +22,7 @@ const getListData = async (req) => {
     return res.redirect(req.baseUrl);
   }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=3`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=997`;
   const [[{ totalRows }]] = await db.query(t_sql);
 
   let totalPages = 0;
@@ -34,12 +34,12 @@ const getListData = async (req) => {
     if (page > totalPages) {
       return res.redirect(req.baseUrl + "?page=" + totalPages);
     }
-    const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,invite_id ,iv_member_id 
+    const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
-        LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id
-        WHERE reserve_member_id=3
-        LIMIT ${perPage * (page - 1)}, ${perPage}`;
+        WHERE reserve_member_id=997
+        ORDER BY reserveId DESC
+        LIMIT ${perPage * (page - 1)}, ${perPage} `;
     [rows] = await db.query(sql);
   }
 
@@ -59,6 +59,63 @@ router.get("/", async (req, res) => {
   };
 
   res.json(output);
+});
+
+router.get("/:reserveRid", async (req, res) => {
+  let output = {
+    success: false,
+    error: "",
+    row: null,
+  };
+
+  const reserveRid = parseInt(req.params.reserveRid) || 0;
+  if (!reserveRid) {
+    // 沒有 sid
+    output.error = "沒有 rid !";
+  } else {
+    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
+    FROM reserve
+    JOIN restaurant ON reserve.rest_id = restaurant.RestID
+    WHERE reserveId=${reserveRid}`;
+    const [rows] = await db.query(sql);
+
+    if (rows.length) {
+      output.success = true;
+      output.row = rows[0];
+      output.row.reserve_date = dayjs(output.row.reserve_date).format("YYYY-MM-DD");
+      // delete i.created_at;
+      output = {
+        ...output,
+      };
+
+    } else {
+      // 沒有資料
+      output.error = "沒有資料 !";
+    }
+  }
+  res.json(output);
+});
+
+
+router.put("/edit", multipartParser, async (req, res) => {
+  const reserveRid = req.body.reserve_id;
+  const sql = `UPDATE reserve SET reserve_member_id=?,
+  rest_id=?,
+  reserve_date=?,
+  reserve_time=?,
+  reserve_people=?
+  WHERE reserveId=${reserveRid}`;
+  const [result1] = await db.query(sql, [
+    req.body.member_id,
+    req.body.rest_id,
+    req.body.reserve_date,
+    req.body.reserve_time,
+    req.body.reserve_people,
+  ]);
+  res.json({
+    result1,
+    postData: req.body,
+  });
 });
 
 module.exports = router;
