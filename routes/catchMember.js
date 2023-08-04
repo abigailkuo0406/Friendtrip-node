@@ -11,6 +11,9 @@ router.post("/", multipartParser, async (req, res) => {
 
   const sql = `SELECT * FROM member WHERE member_id = ${req.body.memberID}`;
   const [result] = await db.query(sql);
+  result.forEach((i) => {
+    i.member_birth = dayjs(i.member_birth).format("YYYY-MM-DD");
+  });
   console.log(result);
   res.json({ all: result });
 });

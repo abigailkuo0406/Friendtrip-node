@@ -14,9 +14,12 @@ router.post("/", multipartParser, async (req, res) => {
   if (!rows.length) {
     return res.json({ msg: "編號錯誤" });
   }
+
   let row = { ...rows[0], ...req.body };
-  const sql = `UPDATE \`member\` SET ? WHERE member_id=${req.body.memberID}`;
-  const [result] = await db.query(sql, [row, member_id]);
+
+  delete row.memberID;
+  const sql = `UPDATE \`member\` SET ? WHERE member_id=?`;
+  const [result] = await db.query(sql, [row, req.body.memberID]);
   console.log(result);
   res.json({ all: result });
 });
