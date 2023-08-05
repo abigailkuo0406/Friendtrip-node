@@ -11,7 +11,7 @@ const photoDirectory = path.join(__dirname, '../public/img/view-img')
 router.get("/", async (req, res) => {
   const itin_member = req.query.itin_member;
   // console.log('itin_member=>',itin_member)
-  const sql=`SELECT m.member_name,m.images,d.*, i.name AS itin_name,i.date,i.coverPhoto,i.itin_member_id,i.note FROM itinerary AS i LEFT JOIN itinerary_details AS d ON d.itin_id = i.itin_id LEFT JOIN member AS m ON m.member_id=i.itin_member_id where i.itin_id=? ORDER BY d.itin_order ASC`;
+  const sql=`SELECT m.member_name,m.images,d.*, i.name AS itin_name,i.date,i.coverPhoto,i.itin_member_id,i.note,i.ppl FROM itinerary AS i LEFT JOIN itinerary_details AS d ON d.itin_id = i.itin_id LEFT JOIN member AS m ON m.member_id=i.itin_member_id where i.itin_id=? ORDER BY d.itin_order ASC`;
   // console.log(sql)
   const [rows] = await db.query(sql,[itin_member]);
   // console.log('result intin_id=>',rows)
