@@ -40,7 +40,11 @@ DESC`
 
     ;[rows] = await db.query(sql)
 
-    const sql_comments = "SELECT * FROM comments"
+    const sql_comments = `SELECT
+        comments. *, member.images
+      FROM
+          comments
+      JOIN member ON member.member_id=comments.member_id`
     ;[comments] = await db.query(sql_comments)
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows, comments }
