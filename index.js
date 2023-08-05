@@ -123,6 +123,7 @@ app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
   res.json(req.file);
 });
 
+//儲存景點照片(google map)
 const request = require("request");
 const path = require("path");
 

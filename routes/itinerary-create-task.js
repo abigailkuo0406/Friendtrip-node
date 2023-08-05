@@ -25,11 +25,16 @@ router.get("/", async (req, res) => {
     output.redirect = req.baseUrl;
     return output;
   }
+  
+  const member_id=req.query.member_id
+  // let where = " WHERE 1 ";
 
-  let where = " WHERE 1 ";
+  // const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
-  const [[{ totalRows }]] = await db.query(t_sql);
+  const t_sql=`select COUNT(1) totalRows from (SELECT * FROM itinerary where itin_member_id=? union all SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?  ) result  order by result.itin_id`
+
+  const [[{ totalRows }]] = await db.query(t_sql,[member_id,member_id]);
+
   let totalPages = 0;
   let rows = [];
   if (totalRows) {
@@ -38,15 +43,14 @@ router.get("/", async (req, res) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = ` SELECT * FROM itinerary ${where} LIMIT ${
+    const sql = `select result.* from (SELECT * FROM itinerary where itin_member_id=? union all SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?  ) result  order by result.itin_id LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
-    [rows] = await db.query(sql);
+    [rows] = await db.query(sql,[member_id,member_id]);
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows };
   return res.json(output);
 });
-
 // 新增資料的功能
 router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查的欄位

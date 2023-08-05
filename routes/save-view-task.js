@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs')
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
-// const upload = require(__dirname + "/../modules/img-upload");
 const previewInitImg = require(__dirname + "/../modules/itinerary-img-preview");
 const multipartParser = previewInitImg.none();
 const photoDirectory = path.join(__dirname, '../public/img/view-img')
@@ -16,46 +15,6 @@ router.get("/", async (req, res) => {
   const [rows] = await db.query(sql,[itin_member]);
   // console.log('result intin_id=>',rows)
   return res.json(rows);
-  // 給予預設值
-  // let output = {
-  //   redirect: "",
-  //   totalRows: 0,
-  //   perPage: 4,
-  //   totalPages: 0,
-  //   page: 1,
-  //   rows: [],
-  // };
-  // const perPage = 5; // 每頁有5筆
-
-  // let page = req.query.page ? parseInt(req.query.page) : 1;
-  //  頁數
-  // if (!page || page < 1) {
-  //   output.redirect = req.baseUrl;
-  //   return output;
-  // }
-
-  // let where = " WHERE 1 ";
-
-  // const t_sql = `SELECT COUNT(1) totalRows FROM itinerary_details ${where}`; // 總筆數
-  // const [[{ totalRows }]] = await db.query(t_sql);
-  // let totalPages = 0;
-  // let rows = [];
-  // if (totalRows) {
-  //   totalPages = Math.ceil(totalRows / perPage);
-  //   if (page > totalPages) {
-  //     output.redirect = req.baseUrl + "?page=" + totalPages;
-  //     return output;
-  //   }
-  //   const sql = ` SELECT * FROM itinerary_details ${where} LIMIT ${
-  //     perPage * (page - 1)
-  //   }, ${perPage}`;
-  //   [rows] = await db.query(sql);
-  // }
-  // output = { ...output, totalRows, perPage, totalPages, page, rows };
-  // return res.json(output);
-
-  // const sql = `SELECT * FROM itinerary_details ORDER BY itin_order ASC`;
-
 });
 
 // 處理前端發送的陣列物件，新增行程
