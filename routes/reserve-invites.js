@@ -5,21 +5,12 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   let output = {
-    // totalRows: 0,
     rows: [],
   };
 
-  //   const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE member_id=3`;
-  //   const [[{ totalRows }]] = await db.query(t_sql);
-
   let rows = [];
 
-  //   if (totalRows) {
-  //     totalPages = Math.ceil(totalRows / perPage);
 
-  //     if (page > totalPages) {
-  //       return res.redirect(req.baseUrl + "?page=" + totalPages);
-  //     }
   const sql = ` SELECT reserveId, reserve_member_id ,invite_id ,iv_member_id,images,member_name
         FROM reserve
         LEFT JOIN invite_member ON reserve.reserveId=invite_member.reserve_id

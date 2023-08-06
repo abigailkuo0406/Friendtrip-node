@@ -61,6 +61,7 @@ router.get("/", async (req, res) => {
   res.json(output);
 });
 
+// 取得單筆訂位資料
 router.get("/:reserveRid", async (req, res) => {
   let output = {
     success: false,
@@ -96,7 +97,7 @@ router.get("/:reserveRid", async (req, res) => {
   res.json(output);
 });
 
-
+// 修改訂位
 router.put("/edit", multipartParser, async (req, res) => {
   const reserveRid = req.body.reserve_id;
   const sql = `UPDATE reserve SET reserve_member_id=?,
@@ -112,10 +113,51 @@ router.put("/edit", multipartParser, async (req, res) => {
     req.body.reserve_time,
     req.body.reserve_people,
   ]);
+
+
   res.json({
-    result1,
+    "修改訂位": result1,
     postData: req.body,
   });
+
 });
+
+router.post("/delete", multipartParser, async (req, res) => {
+  const reserveRid = req.body.reserve_id;
+  console.log('ee', req.body)
+
+  // 刪除既有邀請好友
+  const sql2 = `DELETE FROM invite_member WHERE reserve_id=${reserveRid}`;
+  const [result2] = await db.query(sql2, [
+    req.body.iv_member_id,
+  ]);
+  res.json({
+    "刪除邀請": result2,
+    postData: req.body,
+  });
+})
+
+// 編輯邀請好友資料
+router.post("/invite-edit", multipartParser, async (req, res) => {
+
+  const sql3 =
+    "INSERT INTO `invite_member`" +
+    "(`reserve_id`, `iv_member_id`, `created_time`)" +
+    " VALUES ( ?, ?, NOW())";
+
+  if (req.body.iv_member_id) {
+    console.log('ss', req.body)
+    const ivListLength = req.body.iv_member_id.length;
+    for (let i = 0; i < ivListLength; i++) {
+      const [result3] = await db.query(sql3, [
+        req.body.reserve_id,
+        req.body.iv_member_id[i],
+      ]);
+    }
+  }
+  res.json(req.body);
+
+})
+
 
 module.exports = router;
