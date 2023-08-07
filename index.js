@@ -91,6 +91,7 @@ app.use("/leftMsg", require(__dirname + "/routes/forum-posts"))
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
+app.use("/show-my-posts", require(__dirname + "/routes/my-posts")) //留言板進入點
 app.post("/preview", upload.single("preview"), (req, res) => {
   console.log(req.file)
   res.json(req.file)
