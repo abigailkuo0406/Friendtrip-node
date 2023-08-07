@@ -5,9 +5,7 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
-
 router.get("/", async (req, res) => {
-
   let output = {
     redirect: "",
     totalRows: 0,
@@ -64,15 +62,23 @@ router.get("/", async (req, res) => {
     }
 
     //查詢限制筆數的資料
-    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${perPage * (page - 1)
-      }, ${perPage}`;
+    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${
+      perPage * (page - 1)
+    }, ${perPage}`;
     [rows] = await db.query(sql);
   }
-  output = { ...output, totalRows, perPage, totalPages, page, rows, jwtData: res.locals.jwtData };
+  output = {
+    ...output,
+    totalRows,
+    perPage,
+    totalPages,
+    page,
+    rows,
+    jwtData: res.locals.jwtData,
+  };
   return res.json(output);
   // res.json({ totalRows, totalPages, page, perPage, rows });
 });
-
 
 // 新增訂位資料
 router.post("/", multipartParser, async (req, res) => {
@@ -102,12 +108,12 @@ router.post("/", multipartParser, async (req, res) => {
     "(`reserve_id`, `iv_member_id`, `created_time`)" +
     " VALUES ( ?, ?, NOW())";
 
-  if (req.body.iv_member_id) {
-    const ivListLength = req.body.iv_member_id.length;
+  if (req.body.invites) {
+    const ivListLength = req.body.invites.length;
     for (let i = 0; i < ivListLength; i++) {
       const [result2] = await db.query(sql2, [
         result1.insertId,
-        req.body.iv_member_id[i],
+        req.body.invites[i].inviteId,
       ]);
     }
   }
