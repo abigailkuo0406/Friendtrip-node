@@ -127,7 +127,7 @@ if (req.body.invites) {
   for (let i = 0; i < ivListLength; i++) {
     const [result2] = await db.query(sql3, [
       reserveRid,
-      req.body.invites[i].inviteId,
+      req.body.invites[i].iv_member_id,
     ]);
   }
 }
