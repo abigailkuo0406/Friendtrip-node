@@ -33,6 +33,7 @@ router.get("/", async (req, res) => {
   // let where = " WHERE 1 ";
   let t_sql=''
   // const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
+  
   if (filtercondition==''){
     console.log('count() 全部')
     t_sql=`select COUNT(1) totalRows from (SELECT * FROM itinerary where itin_member_id=? union all SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?  ) result  `
