@@ -25,18 +25,8 @@ router.get("/", async (req, res) => {
   let comments = []
   if (totalRows) {
     totalPages = Math.ceil(totalRows / perPage)
-    const sql = `SELECT
-    posts.post_id,
-    posts.member_id,
-    posts.img,
-    posts.content,
-    posts.created_at            
-FROM
-    posts
-LEFT JOIN member ON posts.member_id = member.member_id
-ORDER BY
-    posts.created_at
-DESC`
+    // =======================================================
+    const sql = `SELECT posts.*, member.images FROM posts LEFT JOIN member ON posts.member_id = member.member_id ORDER BY posts.created_at DESC`
 
     ;[rows] = await db.query(sql)
 
@@ -50,5 +40,7 @@ DESC`
   output = { ...output, totalRows, perPage, totalPages, page, rows, comments }
   return res.json(output)
 })
+
+router.post("/", (req, res) => {})
 
 module.exports = router
