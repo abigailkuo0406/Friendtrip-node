@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
   console.log("this one");
   const perPage = 6;
 
+  console.log('req.query.page:',req.query.page)
   let page = req.query.page ? parseInt(req.query.page) : 1;
   //  頁數
   if (!page || page < 1) {
@@ -69,5 +70,20 @@ router.post("/join-public", async (req, res) => {
       postData: req.body,
     });
 });
+
+router.get('/home',async(req,res)=>{
+  const sql=`select m.*,b.* from (select * from itinerary
+    WHERE itin_id in (
+    select substring_index(GROUP_CONCAT(itin_id order by create_at desc),',',1)  
+    from itinerary
+    where public='公開'
+    GROUP by itin_member_id
+        ) 
+              )b 
+    LEFT join member m
+    on m.member_id=b.itin_member_id;`
+  const [rows] = await db.query(sql);
+  return res.json(rows);
+})
 
 module.exports = router;
