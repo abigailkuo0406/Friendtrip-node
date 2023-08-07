@@ -84,8 +84,8 @@ router.get("/", async (req, res) => {
 router.post("/", multipartParser, async (req, res) => {
   const sql =
     "INSERT INTO `reserve`" +
-    "(`reserve_member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)" +
-    " VALUES ( ?, ?, ?, ?, ?, NOW())";
+    "(`reserve_member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`,`state`, `created_time`)" +
+    " VALUES ( ?, ?, ?, ?, ?,?, NOW())";
 
   // req.body 是透過 multipartParser 解析後的物件，包含客戶端 POST 請求中所攜帶的資料。在這段程式碼中，使用了 req.body 來獲取客戶端提交的 member_id, rest_id, reserve_date, reserve_time, reserve_people 等欄位的值，並將這些值作為參數傳遞給 SQL 查詢中的問號佔位符，完成資料庫插入操作。
   const [result1] = await db.query(sql, [
@@ -94,6 +94,7 @@ router.post("/", multipartParser, async (req, res) => {
     req.body.reserve_date,
     req.body.reserve_time,
     req.body.reserve_people,
+    req.body.state
   ]);
 
   // res.json(req.body);

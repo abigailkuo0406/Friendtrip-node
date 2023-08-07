@@ -34,7 +34,7 @@ router.post("/", multipartParser, async (req, res) => {
       if (page > totalPages) {
         return res.redirect(req.baseUrl + "?page=" + totalPages);
       }
-      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
+      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,state
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
         WHERE reserve_member_id=${req.body.memberID}
@@ -118,19 +118,19 @@ router.put("/edit", multipartParser, async (req, res) => {
 
   // 編輯邀請好友資料
   const sql3 =
-  "INSERT INTO `invite_member`" +
-  "(`reserve_id`, `iv_member_id`, `created_time`)" +
-  " VALUES ( ?, ?, NOW())";
+    "INSERT INTO `invite_member`" +
+    "(`reserve_id`, `iv_member_id`, `created_time`)" +
+    " VALUES ( ?, ?, NOW())";
 
-if (req.body.invites) {
-  const ivListLength = req.body.invites.length;
-  for (let i = 0; i < ivListLength; i++) {
-    const [result2] = await db.query(sql3, [
-      reserveRid,
-      req.body.invites[i].iv_member_id,
-    ]);
+  if (req.body.invites) {
+    const ivListLength = req.body.invites.length;
+    for (let i = 0; i < ivListLength; i++) {
+      const [result2] = await db.query(sql3, [
+        reserveRid,
+        req.body.invites[i].iv_member_id,
+      ]);
+    }
   }
-}
   res.json({
     edit: result1,
     delete: result2,
@@ -139,38 +139,14 @@ if (req.body.invites) {
   });
 });
 
-// router.post("/delete", multipartParser, async (req, res) => {
-//   const reserveRid = req.body.reserve_id;
-
-//   // 刪除既有邀請好友
-//   const sql2 = `DELETE FROM invite_member WHERE reserve_id=${reserveRid}`;
-//   const [result2] = await db.query(sql2, [req.body.iv_member_id]);
-//   res.json({
-//     刪除邀請: result2,
-//     postData: req.body,
-//   });
-// });
-
-// 編輯邀請好友資料
-// router.post("/invite-edit", multipartParser, async (req, res) => {
-//   console.log("pp", req.body.reserve_id);
-//   console.log("55", req.body.invites);
-
-//   const sql3 = `INSERT INTO invite_member(reserve_id, iv_member_id, created_time) VALUES ( ?, ?, NOW())`;
-
-//   if (req.body.invites) {
-//     const ivListLength = req.body.invites.length;
-//     for (let i = 0; i < ivListLength; i++) {
-
-//       const [result3] = await db.query(sql3, [
-//         req.body.reserve_id,
-//         req.body.invites[i].iv_member_id,
-//       ]);
-//       // res.json({
-//       //   NewIV: result3,
-//       // });
-//     }
-//   }
-// });
+// 刪除訂位(修改訂位狀態)
+router.put("/state", multipartParser, async (req, res) => {
+  const reserveRId = req.body.reserve_id;
+  const sql = `UPDATE reserve SET state=0 WHERE reserveId=${reserveRId}`;
+  const [result] = await db.query(sql)
+  res.json({
+    result: result
+  })
+})
 
 module.exports = router;
