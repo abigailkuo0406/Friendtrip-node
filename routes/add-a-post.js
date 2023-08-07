@@ -70,7 +70,7 @@ router.post("/add-a-post", upload.single("avatar"), async (req, res) => {
   console.log(req.body.content)
   const img = "http://localhost:3002/forum_pics/" + req.file.originalname
   const sql = "INSERT INTO `posts`( `member_id`, `content`, `img`, `created_at`) VALUES (?,?,?,NOW())"
-  const [rows] = await db.query(sql, [88, req.body.content, img])
+  const [rows] = await db.query(sql, [req.body.member_id, req.body.content, img])
   res.json(req.body)
 })
 module.exports = router
