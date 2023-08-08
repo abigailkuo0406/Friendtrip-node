@@ -5,6 +5,9 @@ const router = express.Router()
 // const multipartParser = upload.none();
 
 router.get("/", async (req, res) => {
+  // 👇此程式碼接收前端傳來的 queryString
+  const { member_id } = req.query
+  // ☝️此程式碼接收前端傳來的 queryString
   let output = {
     redirect: "",
     totalRows: 0,
@@ -26,15 +29,29 @@ router.get("/", async (req, res) => {
   if (totalRows) {
     totalPages = Math.ceil(totalRows / perPage)
     // =======================================================
-    const sql = `SELECT posts.*, member.images FROM posts LEFT JOIN member ON posts.member_id = member.member_id WHERE posts.member_id = 3 ORDER BY posts.created_at DESC;`
+    const sql = `SELECT
+    posts.*,
+    member.images,
+    member.member_name
+FROM
+    posts
+LEFT JOIN member ON posts.member_id = member.member_id
+WHERE
+    posts.member_id = ?
+ORDER BY
+    posts.created_at
+DESC
+    ;`
 
-    ;[rows] = await db.query(sql)
+    ;[rows] = await db.query(sql, [member_id])
 
     const sql_comments = `SELECT
-        comments. *, member.images
-      FROM
-          comments
-      JOIN member ON member.member_id=comments.member_id`
+    comments.*,
+    member.images,
+    member.member_name
+FROM
+    comments
+JOIN member ON member.member_id = comments.member_id`
     ;[comments] = await db.query(sql_comments)
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows, comments }
