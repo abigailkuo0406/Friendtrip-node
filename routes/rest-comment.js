@@ -8,12 +8,12 @@ const multipartParser = upload.none()
 router.post("/addcomment", multipartParser, async (req, res) => {
     const sql =
         `INSERT INTO restcommment (
-            RestID, member_id, RestStarP, ComtText,created_time) VALUES ( ?, ?, ?, ?, NOW())`
+            RestID, member_id, rating, ComtText,created_time) VALUES ( ?, ?, ?, ?, NOW())`
 
     const [result] = await db.query(sql, [
         req.body.RestID,
         req.body.member_id,
-        req.body.RestStarP,
+        req.body.rating,
         req.body.ComtText,
     ])
 
