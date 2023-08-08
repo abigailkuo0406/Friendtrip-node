@@ -10,7 +10,7 @@ router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查欄位資料
 
   const sql = `SELECT
-  *,
+  *,  mb.member_id AS select_id,
     YEAR(CURDATE()) - YEAR(mb.member_birth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(mb.member_birth, '%m%d')) AS age
   FROM 
     member AS mb
