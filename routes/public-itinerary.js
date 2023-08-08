@@ -71,6 +71,7 @@ router.post("/join-public", async (req, res) => {
     });
 });
 
+// 首頁公開行程輪播
 router.get('/home',async(req,res)=>{
   const sql=`select m.*,b.* from (select * from itinerary
     WHERE itin_id in (
