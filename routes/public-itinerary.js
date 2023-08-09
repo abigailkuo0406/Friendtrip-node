@@ -18,7 +18,8 @@ router.get("/", async (req, res) => {
   console.log("this one");
   const perPage = 6;
 
-  console.log('req.query.page:',req.query.page)
+  const member_id=req.query.member_id
+  console.log("req.query.page:", req.query.page);
   let page = req.query.page ? parseInt(req.query.page) : 1;
   //  頁數
   if (!page || page < 1) {
@@ -26,9 +27,10 @@ router.get("/", async (req, res) => {
     return output;
   }
 
-  let where = "where public='公開' ";
+  let where = "where public='公開'  ";
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
+  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where} and itin_member_id !=${member_id} ` ; // 總筆數
+  console.log('t_sql:',t_sql)
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -38,7 +40,7 @@ router.get("/", async (req, res) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = `SELECT m.member_name as member_name,m.images as images,a.* FROM itinerary a  left join member m  on a.itin_member_id=m.member_id ${where} LIMIT ${
+    const sql = `SELECT m.member_name as member_name,m.images as images,a.* FROM itinerary a  left join member m  on a.itin_member_id=m.member_id ${where} and a.itin_member_id != ${member_id} ORDER BY a.date DESC LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
     [rows] = await db.query(sql);
@@ -61,19 +63,16 @@ router.post("/join-public", async (req, res) => {
     "(`member_id`, `itin_id`) " +
     "VALUES (?,?)";
 
-    const [result] = await db.query(sql, [
-      req.body.member_id,
-      req.body.itin_id,
-    ]);
-    res.json({
-      result,
-      postData: req.body,
-    });
+  const [result] = await db.query(sql, [req.body.member_id, req.body.itin_id]);
+  res.json({
+    result,
+    postData: req.body,
+  });
 });
 
 // 首頁公開行程輪播
-router.get('/home',async(req,res)=>{
-  const sql=`select m.*,b.* from (select * from itinerary
+router.get("/                               ", async (req, res) => {
+  const sql = `select m.*,b.* from (select * from itinerary
     WHERE itin_id in (
     select substring_index(GROUP_CONCAT(itin_id order by create_at desc),',',1)  
     from itinerary
@@ -82,9 +81,10 @@ router.get('/home',async(req,res)=>{
         ) 
               )b 
     LEFT join member m
-    on m.member_id=b.itin_member_id;`
+    on m.member_id=b.itin_member_id;`;
   const [rows] = await db.query(sql);
   return res.json(rows);
-})
+});
+
 
 module.exports = router;
