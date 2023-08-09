@@ -66,6 +66,7 @@ app.use("/register", require(__dirname + "/routes/register"));
 app.use("/edit", require(__dirname + "/routes/edit"));
 app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 app.use("/select", require(__dirname + "/routes/select"));
+app.use("/condition", require(__dirname + "/routes/condition"));
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());

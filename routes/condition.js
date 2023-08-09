@@ -14,6 +14,11 @@ router.post("/", multipartParser, async (req, res) => {
   if (!rows.length) {
     return res.json({ msg: "編號錯誤" });
   }
+  console.log("----------------------------");
+
+  console.log({ ...req.body });
+  console.log({ ...rows[0] });
+  console.log("----------------------------");
 
   let row = { ...rows[0], ...req.body };
 
