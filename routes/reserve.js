@@ -72,7 +72,7 @@ router.get("/:reserveRid", async (req, res) => {
     // 沒有 sid
     output.error = "沒有 rid !";
   } else {
-    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people
+    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people,state
     FROM reserve
     JOIN restaurant ON reserve.rest_id = restaurant.RestID
     WHERE reserveId=${reserveRid}`;
