@@ -34,7 +34,7 @@ router.post("/", multipartParser, async (req, res) => {
       if (page > totalPages) {
         return res.redirect(req.baseUrl + "?page=" + totalPages);
       }
-      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people,state
+      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people,state
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
         WHERE reserve_member_id=${req.body.memberID}
@@ -72,7 +72,7 @@ router.get("/:reserveRid", async (req, res) => {
     // 沒有 sid
     output.error = "沒有 rid !";
   } else {
-    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestImg,reserve_date,reserve_time,reserve_people
+    const sql = `SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people
     FROM reserve
     JOIN restaurant ON reserve.rest_id = restaurant.RestID
     WHERE reserveId=${reserveRid}`;
@@ -143,10 +143,10 @@ router.put("/edit", multipartParser, async (req, res) => {
 router.put("/state", multipartParser, async (req, res) => {
   const reserveRId = req.body.reserve_id;
   const sql = `UPDATE reserve SET state=0 WHERE reserveId=${reserveRId}`;
-  const [result] = await db.query(sql)
+  const [result] = await db.query(sql);
   res.json({
-    result: result
-  })
-})
+    result: result,
+  });
+});
 
 module.exports = router;
