@@ -18,7 +18,8 @@ router.post("/", multipartParser, async (req, res) => {
     FROM restcommment
     JOIN member ON restcommment.comtMemberId = member.member_id
     JOIN restaurant ON restcommment.ComtRestId = restaurant.RestID
-    WHERE ComtRestId=${req.body.restId}`;
+    WHERE ComtRestId=${req.body.restId}
+    ORDER BY ResComtID DESC`;
   const [rows] = await db.query(sql);
   res.json(rows);
 });
