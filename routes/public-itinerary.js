@@ -40,7 +40,7 @@ router.get("/", async (req, res) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = `SELECT m.member_name as member_name,m.images as images,a.* FROM itinerary a  left join member m  on a.itin_member_id=m.member_id ${where} and a.itin_member_id != ${member_id} ORDER BY a.date DESC LIMIT ${
+    const sql = `SELECT m.member_name as member_name,m.images as images,a.* FROM itinerary a  left join member m  on a.itin_member_id=m.member_id ${where} and a.itin_member_id ORDER BY a.create_at DESC LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
     [rows] = await db.query(sql);
@@ -60,8 +60,8 @@ router.get("/", async (req, res) => {
 router.post("/join-public", async (req, res) => {
   const sql =
     "INSERT INTO `public_itinerary` " +
-    "(`member_id`, `itin_id`) " +
-    "VALUES (?,?)";
+    "(`member_id`, `itin_id`,`create_at`) " +
+    "VALUES (?,?,Now())";
 
   const [result] = await db.query(sql, [req.body.member_id, req.body.itin_id]);
   res.json({
@@ -71,7 +71,7 @@ router.post("/join-public", async (req, res) => {
 });
 
 // 首頁公開行程輪播
-router.get("/                               ", async (req, res) => {
+router.get("/home", async (req, res) => {
   const sql = `select m.*,b.* from (select * from itinerary
     WHERE itin_id in (
     select substring_index(GROUP_CONCAT(itin_id order by create_at desc),',',1)  

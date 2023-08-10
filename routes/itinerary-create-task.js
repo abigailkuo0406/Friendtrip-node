@@ -69,13 +69,13 @@ router.get("/", async (req, res) => {
 
     }else if(filtercondition=='public'){
       console.log('RAW 公開')
-      sql = `select * from itinerary where itin_member_id=? and public='公開' order by date DESC LIMIT ${
+      sql = `select * from itinerary where itin_member_id=? and public='公開' order by create_at DESC LIMIT ${
         perPage * (page - 1)
       }, ${perPage}`;    
 
     }else if(filtercondition=='private'){
       console.log('RAW 不公開')
-      sql = `select * from itinerary where itin_member_id=? and public='不公開' order by date DESC LIMIT ${
+      sql = `select * from itinerary where itin_member_id=? and public='不公開' order by create_at DESC LIMIT ${
         perPage * (page - 1)
       }, ${perPage}`;    
 
