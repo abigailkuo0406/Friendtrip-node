@@ -9,16 +9,21 @@ const multipartParser = upload.none();
 router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查欄位資料
   const [rows] = await db.query(
-    `SELECT * FROM \`member\` WHERE  member_id=${req.body.memberID} `
+    `SELECT * FROM \`datings\` WHERE  member_id=${req.body.memberID} `
   );
   if (!rows.length) {
     return res.json({ msg: "編號錯誤" });
   }
+  console.log("----------------------------");
+
+  console.log({ ...req.body });
+  console.log({ ...rows[0] });
+  console.log("----------------------------");
 
   let row = { ...rows[0], ...req.body };
 
   delete row.memberID;
-  const sql = `UPDATE \`member\` SET ? WHERE member_id=?`;
+  const sql = `UPDATE \`datings\` SET ? WHERE member_id=?`;
   const [result] = await db.query(sql, [row, req.body.memberID]);
   console.log(result);
   res.json({ all: result });

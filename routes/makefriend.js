@@ -9,13 +9,15 @@ const multipartParser = upload.none();
 router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查欄位資料
 
-  const sql = `SELECT * FROM member WHERE member_id = ${req.body.memberID}`;
-  const [result] = await db.query(sql);
-  result.forEach((i) => {
-    i.member_birth = dayjs(i.member_birth).format("YYYY-MM-DD");
+  const sql =
+    "INSERT INTO `friends`" + "(`memberId`, `FriendId`)" + " VALUES ( ?, ?)";
+
+  const [result] = await db.query(sql, [req.body.memberId, req.body.FriendId]);
+  console.log("ppppppp", result);
+  res.json({
+    result,
+    postData: req.body,
   });
-  console.log(result);
-  res.json({ all: result });
 });
 
 module.exports = router;

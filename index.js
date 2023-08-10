@@ -30,7 +30,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 3.取用cors
+// 3.取用corsbcryptjs
 const cors = require("cors")
 const corsOption = {
   credentials: true,
@@ -183,6 +183,15 @@ app.get("/try-db", async (req, res) => {
   const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1")
   res.json(rows)
 })
+
+// 會員中心、配對
+app.use("/login", require(__dirname + "/routes/auth"));
+app.use("/register", require(__dirname + "/routes/register"));
+app.use("/edit", require(__dirname + "/routes/edit"));
+app.use("/catchMember", require(__dirname + "/routes/catchMember"));
+app.use("/select", require(__dirname + "/routes/select"));
+app.use("/makefriend", require(__dirname + "/routes/makefriend"));
+app.use("/condition", require(__dirname + "/routes/condition"));
 
 // 自訂行程-建立行程表單
 app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"))
