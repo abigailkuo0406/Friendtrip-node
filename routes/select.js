@@ -19,8 +19,8 @@ router.post("/", multipartParser, async (req, res) => {
   ON 
     dt.member_id = ${req.body.memberID}
   WHERE
-    YEAR(CURDATE()) - YEAR(mb.member_birth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(mb.member_birth, '%m%d')) < 30 AND
-    YEAR(CURDATE()) - YEAR(mb.member_birth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(mb.member_birth, '%m%d')) > 20 AND
+    YEAR(CURDATE()) - YEAR(mb.member_birth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(mb.member_birth, '%m%d')) < dt.i_age_max AND
+    YEAR(CURDATE()) - YEAR(mb.member_birth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(mb.member_birth, '%m%d')) > dt.i_age_min AND
    mb.gender = dt.i_gender`;
 
   const [result] = await db.query(sql);
