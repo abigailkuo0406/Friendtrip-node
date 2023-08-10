@@ -5,7 +5,6 @@ const router = express.Router()
 // const multipartParser = upload.none();
 
 router.get("/", async (req, res) => {
-  const { member_id } = req.query
   let output = {
     redirect: "",
     totalRows: 0,
@@ -27,32 +26,30 @@ router.get("/", async (req, res) => {
   if (totalRows) {
     totalPages = Math.ceil(totalRows / perPage)
     // =======================================================
-    const sql = `SELECT
-    posts.*,
-    member.images,
-    member.member_name
-FROM
-    posts
-LEFT JOIN member ON posts.member_id = member.member_id
-ORDER BY
-    posts.created_at
-DESC`
-
-    ;[rows] = await db.query(sql)
-
-    const sql_comments = `SELECT
-    comments.*,
-    member.images,
-    member.member_name
-FROM
-    comments
-JOIN member ON member.member_id = comments.member_id`
-    ;[comments] = await db.query(sql_comments)
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows, comments }
   return res.json(output)
 })
 
-router.post("/", (req, res) => {})
+// ==========================================
+// app.delete("/posts/:post_id/:member_id", (req, res) => {
+//   const post_id = req.params.post_id
+//   const member_id = req.params.member_id
+
+// Your deletion logic here
+
+//   res.status(200).send("Post deleted successfully")
+// })
+
+// ==========================================
+
+router.post("/delete-this-post", async (req, res) => {
+  console.log("deletePost", req.body)
+  // const sql_comments = `INSERT INTO comments ( member_id, post_id, content, created_at) VALUES ( ?, ?, ?, NOW());`
+  const sql_comments = `DELETE FROM posts WHERE post_id = ? AND member_id = ?;`
+  ;[comments] = await db.query(sql_comments, [req.body.post_id, req.body.postMember_id])
+
+  return res.json({ message: "deleted" })
+})
 
 module.exports = router

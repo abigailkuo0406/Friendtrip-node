@@ -5,7 +5,9 @@ const router = express.Router()
 // const multipartParser = upload.none();
 
 router.get("/", async (req, res) => {
+  // 👇此程式碼接收前端傳來的 queryString
   const { member_id } = req.query
+  // ☝️此程式碼接收前端傳來的 queryString
   let output = {
     redirect: "",
     totalRows: 0,
@@ -34,11 +36,14 @@ router.get("/", async (req, res) => {
 FROM
     posts
 LEFT JOIN member ON posts.member_id = member.member_id
+WHERE
+    posts.member_id = ?
 ORDER BY
     posts.created_at
-DESC`
+DESC
+    ;`
 
-    ;[rows] = await db.query(sql)
+    ;[rows] = await db.query(sql, [member_id])
 
     const sql_comments = `SELECT
     comments.*,

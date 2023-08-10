@@ -65,13 +65,12 @@ app.use("/public/forum_pics", express.static("public/forum_pics"))
 // ☝️此為老師指導，為了圖檔上傳
 
 router.post("/add-a-post", upload.single("avatar"), async (req, res) => {
-  // 以下程式將前端獲得的圖檔上傳到 node server （記得改對應的名字）
   console.log(req.file)
   console.log(req.body)
   console.log(req.body.content)
   const img = "http://localhost:3002/forum_pics/" + req.file.originalname
   const sql = "INSERT INTO `posts`( `member_id`, `content`, `img`, `created_at`) VALUES (?,?,?,NOW())"
-  const [rows] = await db.query(sql, [1, req.body.content, img])
+  const [rows] = await db.query(sql, [req.body.member_id, req.body.content, img])
   res.json(req.body)
 })
 module.exports = router

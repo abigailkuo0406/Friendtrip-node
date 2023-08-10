@@ -46,6 +46,32 @@ app.use((req, res, next) => {
   // res.locals.nickname = '小新';
   // res.locals.title = '小新的網站';
 
+  const auth = req.get("Authorization")
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7)
+    let jwtData = null
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET)
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData // 標記有沒有使用 token
+    }
+  }
+
+  next()
+})
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
   const auth = req.get("Authorization");
   if (auth && auth.indexOf("Bearer ") === 0) {
     const token = auth.slice(7);
@@ -59,7 +85,7 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
@@ -134,11 +160,18 @@ app.use("/public-itinerary",require(__dirname + "/routes/public-itinerary"));
 // 公開行程
 
 
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
+app.use("/show-my-posts", require(__dirname + "/routes/my-posts")) //留言板進入點
+app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"))
+// 👇 將 comments 寫入資料庫
+app.use("/add-a-new-comment", require(__dirname + "/routes/addNewComment"))
+// ☝️ 將 comments 寫入資料庫
 app.post("/preview", upload.single("preview"), (req, res) => {
-  console.log(req.file);
-  res.json(req.file);
-});
+  console.log(req.file)
+  res.json(req.file)
+})
 //照片上傳（多張）
 app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
   console.log(req.files)
@@ -147,94 +180,88 @@ app.post("/try-uploads", upload.array("photos", 10), (req, res) => {
 
 //連線db
 app.get("/try-db", async (req, res) => {
-  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1");
-  res.json(rows);
-});
+  const [rows] = await db.query("SELECT * FROM `address_book` LIMIT 1")
+  res.json(rows)
+})
 
 // 自訂行程-建立行程表單
-app.use(
-  "/custom-itinerary",
-  require(__dirname + "/routes/itinerary-create-task")
-);
+app.use("/custom-itinerary", require(__dirname + "/routes/itinerary-create-task"))
 
 //自訂行程-上傳照片(建立表單)
 app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
-  console.log(req.file);
-  res.json(req.file);
-});
+  console.log(req.file)
+  res.json(req.file)
+})
 
-const request = require('request');
-const path = require('path');
+const request = require("request")
+const path = require("path")
 
-app.post('/upload-viewPhoto', (req, res) => {
+app.post("/upload-viewPhoto", (req, res) => {
   const output = {
     success: false,
     code: 0,
-    error: "",
-  };
-  const photoName = req.body.photoName+'.jpg';
-  const imageUrl = req.body.photoUrl;
+    error: ""
+  }
+  const photoName = req.body.photoName + ".jpg"
+  const imageUrl = req.body.photoUrl
 
-  const downloadDir = path.join(__dirname, '/public/img/view-img');
-      // 確保 download 資料夾存在，如果不存在就創建它
+  const downloadDir = path.join(__dirname, "/public/img/view-img")
+  // 確保 download 資料夾存在，如果不存在就創建它
   if (!fs.existsSync(downloadDir)) {
-    fs.mkdirSync(downloadDir);
+    fs.mkdirSync(downloadDir)
   }
   // 從 URL 下載圖片並保存到 download 資料夾中
 
-  const fileName = path.basename(photoName); // 從 URL 中取得檔案名稱
-  const filePath = path.join(downloadDir, fileName); // 拼接儲存的完整路徑
-  if (! fs.existsSync(filePath)) {
+  const fileName = path.basename(photoName) // 從 URL 中取得檔案名稱
+  const filePath = path.join(downloadDir, fileName) // 拼接儲存的完整路徑
+  if (!fs.existsSync(filePath)) {
     // 使用 request 套件進行下載
     request(imageUrl)
-      .on('error', (err) => {
-        console.error('下載圖片時發生錯誤：', err);
-        output.code = 333;
-        output.error = "下載圖片時發生錯誤：";
-        return res.json(output);
+      .on("error", err => {
+        console.error("下載圖片時發生錯誤：", err)
+        output.code = 333
+        output.error = "下載圖片時發生錯誤："
+        return res.json(output)
       })
       .pipe(fs.createWriteStream(filePath))
-      .on('close', () => {
-        console.log(fileName,'圖片下載完成！');
-        output.success = true;
-        return res.json(output);
-      });
-  }else{
-    console.log(fileName,'圖片已存在，不需下載！');
-    output.success = true;
-    return res.json(output);
+      .on("close", () => {
+        console.log(fileName, "圖片下載完成！")
+        output.success = true
+        return res.json(output)
+      })
+  } else {
+    console.log(fileName, "圖片已存在，不需下載！")
+    output.success = true
+    return res.json(output)
   }
-
-});
+})
 
 //自訂行程-儲存景點行程
-app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
-app.use("/login", require(__dirname + "/routes/auth"));
-app.use("/register", require(__dirname + "/routes/register"));
+app.use("/save-view", require(__dirname + "/routes/save-view-task"))
+app.use("/login", require(__dirname + "/routes/auth"))
+app.use("/register", require(__dirname + "/routes/register"))
 // app.use("/edit", require(__dirname + "/routes/edit"));
-app.use("/catchMember", require(__dirname + "/routes/catchMember"));
+app.use("/catchMember", require(__dirname + "/routes/catchMember"))
 
 //自訂行程-安排行程讀取最新行程名稱
-app.get('/try-name', async (req, res)=>{
-  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `,[req.member_id])
-  res.json(rows);
-});
+app.get("/try-name", async (req, res) => {
+  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `, [req.member_id])
+  res.json(rows)
+})
 //自訂行程-取得該會員最新行程編號
-app.get('/get-itin_id', async (req, res)=>{
+app.get("/get-itin_id", async (req, res) => {
+  const itin_member = req.query.itin_member
+  console.log("itin_member=>", itin_member)
 
-  const itin_member = req.query.itin_member;
-  console.log('itin_member=>',itin_member)
-
-  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
-  console.log('result intin_id=>',result)
-  res.json(result);
-});
-
+  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `, [itin_member])
+  console.log("result intin_id=>", result)
+  res.json(result)
+})
 
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
-app.post("/login", async (req, res) =>  {
+app.post("/login", async (req, res) => {
   const output = {
     success: false,
     code: 0,

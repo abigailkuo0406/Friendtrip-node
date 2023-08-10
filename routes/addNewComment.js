@@ -5,7 +5,6 @@ const router = express.Router()
 // const multipartParser = upload.none();
 
 router.get("/", async (req, res) => {
-  const { member_id } = req.query
   let output = {
     redirect: "",
     totalRows: 0,
@@ -27,32 +26,20 @@ router.get("/", async (req, res) => {
   if (totalRows) {
     totalPages = Math.ceil(totalRows / perPage)
     // =======================================================
-    const sql = `SELECT
-    posts.*,
-    member.images,
-    member.member_name
-FROM
-    posts
-LEFT JOIN member ON posts.member_id = member.member_id
-ORDER BY
-    posts.created_at
-DESC`
-
-    ;[rows] = await db.query(sql)
-
-    const sql_comments = `SELECT
-    comments.*,
-    member.images,
-    member.member_name
-FROM
-    comments
-JOIN member ON member.member_id = comments.member_id`
-    ;[comments] = await db.query(sql_comments)
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows, comments }
   return res.json(output)
 })
 
-router.post("/", (req, res) => {})
+router.post("/add-a-comment", async (req, res) => {
+  const allComments = req.leaveMsg // 是這樣接收 post 進來的信息嗎 ?
+  const member_id = req.member_id
+
+  console.log(req)
+  const sql_comments = `INSERT INTO comments ( member_id, post_id, content, created_at) VALUES ( ?, ?, ?, NOW());`
+  ;[comments] = await db.query(sql_comments, [req.body.member_id, req.body.post_id, req.body.leaveMsg])
+
+  return res.json({ message: "success" })
+})
 
 module.exports = router
