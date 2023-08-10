@@ -45,6 +45,8 @@ router.get("/", async (req, res) => {
     }, ${perPage}`;
     [rows] = await db.query(sql);
   }
+
+  
   output = { ...output, totalRows, perPage, totalPages, page, rows };
   return res.json(output);
 });
