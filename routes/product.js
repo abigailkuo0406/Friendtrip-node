@@ -18,6 +18,25 @@ router.get("/", async (req, res) => {
   const perPage = 9;
   let keyword = req.query.keyword || "";
   let page = req.query.page ? parseInt(req.query.page) : 1;
+
+  let category = req.query.category
+    ? req.query.category != "all"
+      ? ` AND product_category LIKE "%${req.query.category}%"`
+      : ""
+    : "";
+  let order = "";
+  switch (req.query.order) {
+    case "AtoZ":
+      order = `ORDER BY product_price`;
+      break;
+    case "ZtoA":
+      order = `ORDER BY product_price DESC`;
+      break;
+    case "rating":
+      order = `ORDER BY product_rate DESC`;
+      break;
+  }
+
   if (!page || page < 1) {
     output.redirect = req.baseUrl;
     return res.json(output);
@@ -27,14 +46,12 @@ router.get("/", async (req, res) => {
   if (keyword) {
     const kw_escaped = db.escape("%" + keyword + "%");
     where += ` AND ( 
-          \`name\` LIKE ${kw_escaped} 
-          OR
-          \`address\` LIKE ${kw_escaped}
+          product_name LIKE ${kw_escaped} 
           )
         `;
   }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM products ${where}`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM products ${where} ${category} ${order}`;
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -45,9 +62,108 @@ router.get("/", async (req, res) => {
       return res.json(output);
     }
 
-    const sql = ` SELECT * FROM products ${where} LIMIT ${
+    const sql = ` SELECT * FROM products ${where} ${category} ${order} LIMIT ${
       perPage * (page - 1)
     }, ${perPage}`;
+    [rows] = await db.query(sql);
+  }
+  output = { ...output, totalRows, perPage, totalPages, page, rows, keyword };
+  return res.json(output);
+});
+router.post("/findCollection", async (req, res) => {
+  let output = {
+    redirect: "",
+    totalRows: 0,
+    perPage: 25,
+    totalPages: 0,
+    page: 1,
+    rows: [],
+  };
+  const perPage = 9;
+  let keyword = req.body.keyword;
+  let page = req.query.page ? parseInt(req.query.page) : 1;
+
+  if (!page || page < 1) {
+    output.redirect = req.baseUrl;
+    return res.json(output);
+  }
+
+  let where = " WHERE 1 ";
+  if (keyword) {
+    const kw_escaped = db.escape("%" + keyword + "%");
+    where += ` AND ( 
+          product_name LIKE ${kw_escaped} 
+
+          )
+        `;
+  }
+
+  const t_sql = `SELECT COUNT(1) AS totalRows FROM products INNER JOIN product_collection ON products.product_id = product_collection.product_id ${where} AND product_collection.member_id="${req.body.memberID}"`;
+  const [[{ totalRows }]] = await db.query(t_sql);
+  let totalPages = 0;
+  let rows = [];
+
+  if (totalRows) {
+    totalPages = Math.ceil(totalRows / perPage);
+    if (page > totalPages) {
+      output.redirect = req.baseUrl + "?page=" + totalPages;
+      return res.json(output);
+    }
+
+    const sql = ` SELECT * FROM products INNER JOIN product_collection ON products.product_id = product_collection.product_id ${where} AND product_collection.member_id="${
+      req.body.memberID
+    }" LIMIT ${perPage * (page - 1)}, ${perPage}`;
+    [rows] = await db.query(sql);
+  }
+  output = { ...output, totalRows, perPage, totalPages, page, rows, keyword };
+  return res.json(output);
+});
+
+router.post("/findBuyagain", async (req, res) => {
+  let output = {
+    redirect: "",
+    totalRows: 0,
+    perPage: 25,
+    totalPages: 0,
+    page: 1,
+    rows: [],
+  };
+  const perPage = 9;
+  let keyword = req.body.keyword;
+  let page = req.query.page ? parseInt(req.query.page) : 1;
+
+  if (!page || page < 1) {
+    output.redirect = req.baseUrl;
+    return res.json(output);
+  }
+
+  let where = " WHERE 1 ";
+  if (keyword) {
+    const kw_escaped = db.escape("%" + keyword + "%");
+    where += ` AND ( 
+         product_name LIKE ${kw_escaped} 
+
+          )
+        `;
+  }
+
+  const t_sql = `SELECT COUNT(1) AS totalRows FROM products INNER JOIN (SELECT product_id, member_id FROM product_checking_item GROUP BY product_id, member_id) AS product_checking_item ON products.product_id = product_checking_item.product_id ${where} AND product_checking_item.member_id=${req.body.memberID}`;
+
+  const [[{ totalRows }]] = await db.query(t_sql);
+  let totalPages = 0;
+  let rows = [];
+
+  if (totalRows) {
+    totalPages = Math.ceil(totalRows / perPage);
+    if (page > totalPages) {
+      output.redirect = req.baseUrl + "?page=" + totalPages;
+      return res.json(output);
+    }
+
+    const sql = ` SELECT * FROM products
+    INNER JOIN (SELECT product_id, member_id FROM product_checking_item GROUP BY product_id, member_id) AS product_checking_item ON products.product_id = product_checking_item.product_id ${where} AND product_checking_item.member_id=${
+      req.body.memberID
+    } LIMIT ${perPage * (page - 1)}, ${perPage}`;
     [rows] = await db.query(sql);
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows, keyword };
@@ -224,14 +340,6 @@ router.post("/cart/checking", async (req, res) => {
   const timestamp = new Date().getTime();
   let batch =
     Math.random().toString(36).substring(2, 8) + timestamp.toString(36);
-  // const batchSelect_sql = `SELECT checking.checking_batch FROM checking
-  // WHERE checking.member_id=${member_id}`;
-  // const [batchSelect_rows] = await db.query(batchSelect_sql);
-  // if (batchSelect_rows.length > 0) {
-  //   maxBatch = batchSelect_rows.reduce((max, current) => {
-  //     return current.checking_batch > max ? current.checking_batch : max;
-  //   }, -Infinity);
-  // }
   checkingSelect_rows.forEach(async (e, i) => {
     let checkingAdd_sql = `INSERT INTO product_checking_item (member_id, product_id, product_num, checking_total, order_id)
     VALUES (${e.member_id}, ${e.product_id}, ${e.product_num}, ${e.cart_total}, '${batch}')`;
