@@ -6,6 +6,11 @@ const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 const app = express();
 
+router.post("/deleteTempProduct", async (req, res) => {
+  let delete_temp_sql = `DELETE FROM product_checking_item WHERE order_id = '${req.body.orderID}'`;
+  const [rows_delete] = await db.query(delete_temp_sql);
+});
+
 router.post("/getProduct", async (req, res) => {
   const getProduct_sql = `SELECT product_checking_item.*, products.* FROM product_checking_item
     INNER JOIN products ON product_checking_item.product_id = products.product_id WHERE product_checking_item.order_id = '${req.body.orderID}'`;

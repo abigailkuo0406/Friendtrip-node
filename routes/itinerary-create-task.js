@@ -166,4 +166,10 @@ router.get("/public-itineraries", async (req, res) => {
 //   return res.json(output);
 // })
 
+//篩選公開與不公開
+router.get("/public-itineraries", async (req, res) => {
+  const sql = `SELECT * FROM itinerary WHERE public ='公開'`;
+  const [rows] = await db.query(sql);
+  return res.json(rows);
+});
 module.exports = router;

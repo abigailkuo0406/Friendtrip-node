@@ -5,7 +5,9 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
+
 router.get("/", async (req, res) => {
+
   let output = {
     redirect: "",
     totalRows: 0,

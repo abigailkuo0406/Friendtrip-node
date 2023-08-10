@@ -5,6 +5,12 @@ const router = express.Router();
 const upload = require(__dirname + "/../modules/img-upload");
 const multipartParser = upload.none();
 
+router.post("/", multipartParser, async (req, res) => {
+  // console.log(req.body.rid)
+  res.json(req.body);
+
+})
+
 router.get("/", async (req, res) => {
   let output = {
     totalRows: 0,

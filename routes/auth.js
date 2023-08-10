@@ -106,6 +106,8 @@ router.post("/admin", async (req, res) => {
     id_number: rows[0].id_number,
     gender: rows[0].gender,
     create_at: rows[0].create_at,
+    location: rows[0].location,
+    mobile: rows[0].mobile,
     token,
   };
   // 加入 output.data 為：
