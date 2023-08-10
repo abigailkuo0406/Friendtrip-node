@@ -60,14 +60,14 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
   }
 
   next();
-  
+
 });
 
 // 4.路由設定(自行依序往下新增)
@@ -83,6 +83,7 @@ app.use("/restmeal", require(__dirname + "/routes/rest-meal"))
 app.use("/friends", require(__dirname + "/routes/friends"))
 app.use("/reserve", require(__dirname + "/routes/reserve"))
 app.use("/reserveinvites", require(__dirname + "/routes/reserve-invites"))
+app.use("/comment", require(__dirname + "/routes/rest-comment"))
 
 
 
@@ -134,11 +135,11 @@ app.post('/upload-viewPhoto', (req, res) => {
     code: 0,
     error: "",
   };
-  const photoName = req.body.photoName+'.jpg';
+  const photoName = req.body.photoName + '.jpg';
   const imageUrl = req.body.photoUrl;
 
   const downloadDir = path.join(__dirname, '/public/img/view-img');
-      // 確保 download 資料夾存在，如果不存在就創建它
+  // 確保 download 資料夾存在，如果不存在就創建它
   if (!fs.existsSync(downloadDir)) {
     fs.mkdirSync(downloadDir);
   }
@@ -146,7 +147,7 @@ app.post('/upload-viewPhoto', (req, res) => {
 
   const fileName = path.basename(photoName); // 從 URL 中取得檔案名稱
   const filePath = path.join(downloadDir, fileName); // 拼接儲存的完整路徑
-  if (! fs.existsSync(filePath)) {
+  if (!fs.existsSync(filePath)) {
     // 使用 request 套件進行下載
     request(imageUrl)
       .on('error', (err) => {
@@ -157,12 +158,12 @@ app.post('/upload-viewPhoto', (req, res) => {
       })
       .pipe(fs.createWriteStream(filePath))
       .on('close', () => {
-        console.log(fileName,'圖片下載完成！');
+        console.log(fileName, '圖片下載完成！');
         output.success = true;
         return res.json(output);
       });
-  }else{
-    console.log(fileName,'圖片已存在，不需下載！');
+  } else {
+    console.log(fileName, '圖片已存在，不需下載！');
     output.success = true;
     return res.json(output);
   }
@@ -170,25 +171,25 @@ app.post('/upload-viewPhoto', (req, res) => {
 });
 
 //自訂行程-儲存景點行程
-app.use("/save-view", require(__dirname + "/routes/save-view-task")); 
+app.use("/save-view", require(__dirname + "/routes/save-view-task"));
 app.use("/login", require(__dirname + "/routes/auth"));
 app.use("/register", require(__dirname + "/routes/register"));
 // app.use("/edit", require(__dirname + "/routes/edit"));
 app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 
 //自訂行程-安排行程讀取最新行程名稱
-app.get('/try-name', async (req, res)=>{
-  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `,[req.member_id])
+app.get('/try-name', async (req, res) => {
+  const [rows] = await db.query(`SELECT name,itin_member_id FROM itinerary WHERE itin_member_id=2 ORDER BY create_at DESC `, [req.member_id])
   res.json(rows);
 });
 //自訂行程-取得該會員最新行程編號
-app.get('/get-itin_id', async (req, res)=>{
+app.get('/get-itin_id', async (req, res) => {
 
   const itin_member = req.query.itin_member;
-  console.log('itin_member=>',itin_member)
+  console.log('itin_member=>', itin_member)
 
-  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,[itin_member])
-  console.log('result intin_id=>',result)
+  const [result] = await db.query(`SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `, [itin_member])
+  console.log('result intin_id=>', result)
   res.json(result);
 });
 
@@ -196,7 +197,7 @@ app.get('/get-itin_id', async (req, res)=>{
 // 登入
 // 要使用此程式才能使用：app.use(express.urlencoded({ extended: false }));
 // 可以抓到 JSON：app.use(express.json());
-app.post("/login", async (req, res) =>  {
+app.post("/login", async (req, res) => {
   const output = {
     success: false,
     code: 0,
