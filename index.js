@@ -92,6 +92,10 @@ app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"))
 //照片上傳（單張）
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")) //留言板進入點
 app.use("/show-my-posts", require(__dirname + "/routes/my-posts")) //留言板進入點
+app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"))
+// 👇 將 comments 寫入資料庫
+app.use("/add-a-new-comment", require(__dirname + "/routes/addNewComment"))
+// ☝️ 將 comments 寫入資料庫
 app.post("/preview", upload.single("preview"), (req, res) => {
   console.log(req.file)
   res.json(req.file)
