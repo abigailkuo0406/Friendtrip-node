@@ -25,11 +25,32 @@ router.get("/", async (req, res) => {
     output.redirect = req.baseUrl;
     return output;
   }
+  
+  const member_id=req.query.member_id
+  const filtercondition=req.query.filtercondition
+  console.log('create-task-get:',filtercondition)
 
-  let where = " WHERE 1 ";
+  // let where = " WHERE 1 ";
+  let t_sql=''
+  // const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
+  
+  if (filtercondition==''){
+    console.log('count() 全部')
+    t_sql=`select COUNT(1) totalRows from (SELECT * FROM itinerary where itin_member_id=? union all SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?) result  `
+  }else if(filtercondition=='public'){
+    console.log('count()公開')
+    t_sql=`select COUNT(1) totalRows from itinerary where itin_member_id=? and public='公開'`
+  }else if(filtercondition=='private'){
+    console.log('count()不公開')
+    t_sql=`select COUNT(1) totalRows from itinerary where itin_member_id=? and public='不公開'`
+  }else if(filtercondition=='join'){
+    console.log('count()跟團')
+    t_sql=`select COUNT(1) totalRows from (SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?) result`
+  }
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary ${where}`; // 總筆數
-  const [[{ totalRows }]] = await db.query(t_sql);
+  const [[{ totalRows }]] = await db.query(t_sql,[member_id,member_id]);
+
+
   let totalPages = 0;
   let rows = [];
   if (totalRows) {
@@ -38,22 +59,51 @@ router.get("/", async (req, res) => {
       output.redirect = req.baseUrl + "?page=" + totalPages;
       return output;
     }
-    const sql = ` SELECT * FROM itinerary ${where} LIMIT ${
-      perPage * (page - 1)
-    }, ${perPage}`;
-    [rows] = await db.query(sql);
+    
+    let sql=''
+    if (filtercondition==''){
+      console.log('RAW 全部')
+      sql = `select result.* from (SELECT * FROM itinerary where itin_member_id=? union all SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?  ) result  order by result.date DESC LIMIT ${
+        perPage * (page - 1)
+      }, ${perPage}`;
+
+    }else if(filtercondition=='public'){
+      console.log('RAW 公開')
+      sql = `select * from itinerary where itin_member_id=? and public='公開' order by create_at DESC LIMIT ${
+        perPage * (page - 1)
+      }, ${perPage}`;    
+
+    }else if(filtercondition=='private'){
+      console.log('RAW 不公開')
+      sql = `select * from itinerary where itin_member_id=? and public='不公開' order by create_at DESC LIMIT ${
+        perPage * (page - 1)
+      }, ${perPage}`;    
+
+    }else if(filtercondition=='join'){
+      console.log('RAW join')
+      sql = `select result.* from (SELECT i.* FROM itinerary AS i left join public_itinerary AS p on i.itin_id=p.itin_id where p.member_id=?  ) result  order by result.date DESC LIMIT ${
+        perPage * (page - 1)
+      }, ${perPage}`;    
+    }
+    
+    [rows] = await db.query(sql,[member_id,member_id]);
+  
+    
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows };
+  // console.log('output=>',output)
+
   return res.json(output);
 });
 
 // 新增資料的功能
 router.post("/", multipartParser, async (req, res) => {
+  console.log(req)
   // TODO: 要檢查的欄位
   const sql =
     "INSERT INTO `itinerary` " +
-    "(`itin_member_id`, `coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `create_at`) " +
-    "VALUES (?,?,?,?,?,?,?,?,NOW())";
+    "(`itin_member_id`, `coverPhoto`, `name`, `date`, `description`, `public`, `ppl`, `note`, `time`, `create_at`) " +
+    "VALUES (?,?,?,?,?,?,?,?,?,NOW())";
 
   const [result] = await db.query(sql, [
     req.body.itin_member_id,
@@ -64,6 +114,7 @@ router.post("/", multipartParser, async (req, res) => {
     req.body.public,
     req.body.ppl,
     req.body.note,
+    req.body.time,
   ]);
   res.json({
     result,
@@ -80,9 +131,39 @@ router.delete("/:itin_id", async (req, res) => {
 });
 
 //篩選公開與不公開
+let output = {
+  redirect: "",
+  totalRows: 0,
+  perPage: 4,
+  totalPages: 0,
+  page: 1,
+  rows: [],
+};
 router.get("/public-itineraries", async (req, res) => {
   const sql = `SELECT * FROM itinerary WHERE public ='公開'`;
   const [rows] = await db.query(sql);
   return res.json(rows);
 });
+
+// //排序方式->行程紀錄
+// router.get('/order-by',async(req,res)=>{
+//   let output = {
+//     redirect: "",
+//     totalRows: 0,
+//     perPage: 4,
+//     totalPages: 0,
+//     page: 1,
+//     rows: [],
+//   };
+//   const sortBy=req.query.sort;
+//   let order='DESC';
+//   if(sortBy==='oldest'){
+//     order='ASC'
+//   }
+//   const sql= `SELECT * FROM itinerary ORDER BY date ${order}`;
+//   const [rows] = await db.query(sql);
+//   output.rows = rows
+//   return res.json(output);
+// })
+
 module.exports = router;
