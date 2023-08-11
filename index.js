@@ -8,7 +8,6 @@ if (process.argv[2] === "production") {
   require("dotenv").config()
 }
 
-
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 const previewForumPic = require(__dirname + "/modules/forum-img-preview");
@@ -154,6 +153,12 @@ app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留�
 app.use("/leftMsg", require(__dirname + "/routes/forum-posts"));
 
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
+
+// 官方行程
+app.use(
+  "/show-official-itinerary",
+  require(__dirname + "/routes/official-itinerary.js")
+);
 
 
 app.use("/custom-itinerary",require(__dirname + "/routes/itinerary-create-task"));// 自訂行程-建立行程表單
