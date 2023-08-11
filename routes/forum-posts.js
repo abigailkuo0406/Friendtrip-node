@@ -1,6 +1,7 @@
 const express = require("express")
 const db = require(__dirname + "/../modules/mysql2")
 const router = express.Router()
+// const dayjs = require("dayjs")
 // const upload = require(__dirname + "/../modules/img-upload");
 // const multipartParser = upload.none();
 
@@ -35,10 +36,15 @@ FROM
     posts
 LEFT JOIN member ON posts.member_id = member.member_id
 ORDER BY
-    posts.created_at
+    posts.post_id
 DESC`
 
     ;[rows] = await db.query(sql)
+    // 👇 如果要在後端修改時間格式，可以參考下面 dayjs 套件寫法，我的做法是在前端用 moment 修改時間輸出格式
+    // rows.forEach(i => {
+    //   i.reserve_date = dayjs(i.reserve_date).format("YYYY-MM-DD")
+    // })
+    // ☝️用 dayjs 改變時間格式
 
     const sql_comments = `SELECT
     comments.*,
