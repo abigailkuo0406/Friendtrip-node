@@ -64,22 +64,30 @@ router.get("/", async (req, res) => {
     }
 
     //查詢限制筆數的資料
-    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${perPage * (page - 1)
-      }, ${perPage}`;
+    const sql = ` SELECT * FROM restaurant ${where} LIMIT ${
+      perPage * (page - 1)
+    }, ${perPage}`;
     [rows] = await db.query(sql);
   }
-  output = { ...output, totalRows, perPage, totalPages, page, rows, jwtData: res.locals.jwtData };
+  output = {
+    ...output,
+    totalRows,
+    perPage,
+    totalPages,
+    page,
+    rows,
+    jwtData: res.locals.jwtData,
+  };
   return res.json(output);
   // res.json({ totalRows, totalPages, page, perPage, rows });
 });
-
 
 // 新增訂位資料
 router.post("/", multipartParser, async (req, res) => {
   const sql =
     "INSERT INTO `reserve`" +
-    "(`reserve_member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`, `created_time`)" +
-    " VALUES ( ?, ?, ?, ?, ?, NOW())";
+    "(`reserve_member_id`, `rest_id`, `reserve_date`, `reserve_time`, `reserve_people`,`state`, `created_time`)" +
+    " VALUES ( ?, ?, ?, ?, ?,?, NOW())";
 
   // req.body 是透過 multipartParser 解析後的物件，包含客戶端 POST 請求中所攜帶的資料。在這段程式碼中，使用了 req.body 來獲取客戶端提交的 member_id, rest_id, reserve_date, reserve_time, reserve_people 等欄位的值，並將這些值作為參數傳遞給 SQL 查詢中的問號佔位符，完成資料庫插入操作。
   const [result1] = await db.query(sql, [
@@ -88,6 +96,7 @@ router.post("/", multipartParser, async (req, res) => {
     req.body.reserve_date,
     req.body.reserve_time,
     req.body.reserve_people,
+    req.body.state
   ]);
 
   // res.json(req.body);
@@ -102,12 +111,12 @@ router.post("/", multipartParser, async (req, res) => {
     "(`reserve_id`, `iv_member_id`, `created_time`)" +
     " VALUES ( ?, ?, NOW())";
 
-  if (req.body.iv_member_id) {
-    const ivListLength = req.body.iv_member_id.length;
+  if (req.body.invites) {
+    const ivListLength = req.body.invites.length;
     for (let i = 0; i < ivListLength; i++) {
       const [result2] = await db.query(sql2, [
         result1.insertId,
-        req.body.iv_member_id[i],
+        req.body.invites[i].inviteId,
       ]);
     }
   }
