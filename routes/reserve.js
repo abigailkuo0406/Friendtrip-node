@@ -14,13 +14,30 @@ router.post("/", multipartParser, async (req, res) => {
     rows: [],
   };
 
-  const perPage = 10;
+  const perPage = 3;
+
+  //取得queryString查詢條件
+  let cancel = req.query.cancel || "";
+  let nocancel = req.query.nocancel || "";
+
 
   let page = req.query.page ? parseInt(req.query.page) : 1;
 
   if (!page || page < 1) {
     return res.redirect(req.baseUrl);
   }
+
+  let where = "";
+  //設定有關鍵字時，SQL查詢語法
+  if (cancel || nocancel) {
+    if (cancel) {
+      where = `&& state=0`
+    }
+    else if (nocancel) {
+      where = `&& state=1`
+    }
+  }
+
   if (req.body.memberID) {
     const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=${req.body.memberID}`;
     const [[{ totalRows }]] = await db.query(t_sql);
@@ -37,7 +54,7 @@ router.post("/", multipartParser, async (req, res) => {
       const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people,state
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
-        WHERE reserve_member_id=${req.body.memberID}
+        WHERE reserve_member_id=${req.body.memberID} ${where}
         ORDER BY reserveId DESC
         LIMIT ${perPage * (page - 1)}, ${perPage} `;
       [rows] = await db.query(sql);
