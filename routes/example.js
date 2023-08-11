@@ -25,8 +25,8 @@ router.get("/", async (req, res) => {
   let where = " WHERE 1 ";
   // if (keyword) {
   //   const kw_escaped = db.escape("%" + keyword + "%");
-  //   where += ` AND ( 
-  //         \`bookname\` LIKE ${kw_escaped} 
+  //   where += ` AND (
+  //         \`bookname\` LIKE ${kw_escaped}
   //         OR
   //         \`author\` LIKE ${kw_escaped}
   //         )
