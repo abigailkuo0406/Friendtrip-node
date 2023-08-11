@@ -10,7 +10,9 @@ router.post("/", multipartParser, async (req, res) => {
   // TODO: 要檢查欄位資料
 
   const sql =
-    "INSERT INTO `friends`" + "(`memberId`, `FriendId`)" + " VALUES ( ?, ?)";
+    "INSERT INTO `friends`" +
+    "(`memberId`, `FriendId`, `create_at`)" +
+    " VALUES ( ?, ?, NOW())";
 
   const [result] = await db.query(sql, [req.body.memberId, req.body.FriendId]);
   console.log("kkkkkkkk", result);
