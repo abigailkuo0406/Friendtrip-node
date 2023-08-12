@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     rows: [],
   };
 
-  const perPage = 2; //一頁幾筆資料
+  const perPage = 10; //一頁幾筆資料
 
   //取得queryString查詢條件
   let city = req.query.city || "";
