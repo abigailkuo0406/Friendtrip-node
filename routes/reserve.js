@@ -14,7 +14,7 @@ router.post("/", multipartParser, async (req, res) => {
     rows: [],
   };
 
-  const perPage = 3;
+  const perPage = 10;
 
   //取得queryString查詢條件
   let cancel = req.query.cancel || "";
