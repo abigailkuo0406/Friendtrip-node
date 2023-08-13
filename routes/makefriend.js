@@ -11,11 +11,15 @@ router.post("/", multipartParser, async (req, res) => {
 
   const sql =
     "INSERT INTO `friends`" +
-    "(`memberId`, `FriendId`, `create_at`)" +
-    " VALUES ( ?, ?, NOW())";
+    "(`memberId`, `FriendId`, `acceptState`, `create_at`)" +
+    " VALUES ( ?, ?, ?, NOW())";
 
-  const [result] = await db.query(sql, [req.body.memberId, req.body.FriendId]);
-  console.log("kkkkkkkk", result);
+  const [result] = await db.query(sql,
+    [
+      req.body.memberId,
+      req.body.FriendId,
+      req.body.acceptState
+    ]);
   res.json({
     result,
     postData: req.body,

@@ -1,6 +1,8 @@
 const express = require("express");
 const db = require(__dirname + "/../modules/mysql2");
 const router = express.Router();
+const upload = require(__dirname + "/../modules/img-upload");
+const multipartParser = upload.none();
 
 router.post("/", async (req, res) => {
   const sql = `SELECT 
@@ -9,29 +11,36 @@ router.post("/", async (req, res) => {
   member_name,images
   FROM friends
   INNER JOIN member ON friends.FriendId = member.member_id
-  WHERE memberId = ${req.body.memberID}`;
+  WHERE memberId = ${req.body.memberID} && acceptState=0`;
   const [rows] = await db.query(sql);
   res.json({ all: rows });
 });
-// router.get("/", async (req, res) => {
-//   let output = {
-//     totalRows: 0,
-//     rows: [],
-//   };
-//   const t_sql = `SELECT COUNT(1) totalRows FROM friends WHERE 1`;
-//   const [[{ totalRows }]] = await db.query(t_sql);
-//   let rows = [];
 
-//   const sql = ` SELECT memberId,FriendId,member_name,images FROM friends INNER JOIN member
-//     ON friends.FriendId = member.member_id WHERE memberId=1`;
+// 修改好友狀態(接受邀請)
+router.put("/edit", multipartParser, async (req, res) => {
+  const memberId = req.body.memberID;
+  const FriendId = req.body.FriendId;
 
-//   [rows] = await db.query(sql);
+  // 修改指定好友關係
+  const sql = `UPDATE friends SET acceptState=1 WHERE memberId=${memberId} && FriendId=${FriendId}`;
+  const [result1] = await db.query(sql);
 
-//   output = {
-//     ...output,
-//     totalRows,
-//     rows,
-//   };
-//   return res.json(output);
-// });
+
+  res.json({
+    edit: result1,
+    postData: req.body,
+  });
+});
+
+// 刪除好友(拒絕好友邀請)
+router.delete("/delete", multipartParser, async (req, res) => {
+  const memberId = req.body.memberID;
+  const FriendId = req.body.FriendId;
+  const sql = `DELETE FROM friends WHERE friends.memberId =${memberId} AND friends.FriendId = ${FriendId}`
+  const [result] = await db.query(sql)
+  res.json({
+    result: result,
+  });
+})
+
 module.exports = router;
