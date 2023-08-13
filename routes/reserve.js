@@ -18,7 +18,11 @@ router.post("/", multipartParser, async (req, res) => {
 
   //取得queryString查詢條件
   let cancel = req.query.cancel || "";
-  let nocancel = req.query.nocancel || "";
+  let noCancel = req.query.nocancel || "";
+  let pass = req.query.pass || "";
+  let noPass = req.query.nopass || "";
+
+
 
 
   let page = req.query.page ? parseInt(req.query.page) : 1;
@@ -27,19 +31,54 @@ router.post("/", multipartParser, async (req, res) => {
     return res.redirect(req.baseUrl);
   }
 
-  let where = "";
+  let cancelOrNot = "";
+  let passOrNot = "";
+
   //設定有關鍵字時，SQL查詢語法
-  if (cancel || nocancel) {
+  if (cancel || noCancel) {
     if (cancel) {
-      where = `&& state=0`
+      cancelOrNot = `&& state=0`
     }
-    else if (nocancel) {
-      where = `&& state=1`
+    else if (noCancel) {
+      cancelOrNot = `&& state=1`
     }
   }
 
+  if (pass || noPass) {
+    if (pass) {
+      passOrNot = `&& pass=1`
+    }
+    else if (noPass) {
+      passOrNot = `&& pass=0`
+    }
+  }
+
+  // 定義當天
+  const theDay = Date.parse(new Date().toDateString())
+
+  let checkDateRows = []
+
   if (req.body.memberID) {
-    const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=${req.body.memberID}`;
+    // 1. 先檢查有沒有過期的訂單
+
+    // 挑出某會員的訂單
+    const sqlCheckDate = `SELECT * FROM reserve WHERE reserve_member_id=${req.body.memberID}`
+    checkDateRows = await db.query(sqlCheckDate);
+
+    // 檢查日期
+    checkDateRows[0].forEach((i) => {
+      // 轉換日期格式
+      i.reserve_date = dayjs(i.reserve_date).format("YYYY-MM-DD");
+
+      // 如果日期比今天小，就是過期了(已完成)，更新pass欄位為1
+      if (Date.parse(i.reserve_date) < theDay) {
+        const sqlDateUpdate = `UPDATE reserve SET pass = 1 WHERE reserve.reserveId = ${i.reserveId}`;
+        i = db.query(sqlDateUpdate) //要執行update SQL
+      };
+    });
+
+    // 撈出要顯示的訂單
+    const t_sql = `SELECT COUNT(1) totalRows FROM reserve WHERE reserve_member_id=${req.body.memberID} ${cancelOrNot} ${passOrNot}`;
     const [[{ totalRows }]] = await db.query(t_sql);
 
     let totalPages = 0;
@@ -51,10 +90,10 @@ router.post("/", multipartParser, async (req, res) => {
       if (page > totalPages) {
         return res.redirect(req.baseUrl + "?page=" + totalPages);
       }
-      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people,state
+      const sql = ` SELECT  reserve_member_id, reserveId,rest_id,RestName,RestPhone,RestAdress,RestImg,reserve_date,reserve_time,reserve_people,state,pass
         FROM reserve
         JOIN restaurant ON reserve.rest_id = restaurant.RestID 
-        WHERE reserve_member_id=${req.body.memberID} ${where}
+        WHERE reserve_member_id=${req.body.memberID}${cancelOrNot}${passOrNot}
         ORDER BY reserveId DESC
         LIMIT ${perPage * (page - 1)}, ${perPage} `;
       [rows] = await db.query(sql);
