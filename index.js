@@ -8,10 +8,13 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
+
 // 引入moment套件
 const moment = require("moment");
 // 引入uuid套件
 const { v4: uuidv4 } = require("uuid")
+// 引入socket io套件
+const socket = require("socket.io")
 
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
@@ -24,6 +27,8 @@ const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
 // 1.引入express
 const express = require("express");
 
+const http = require('http')
+
 //將seesion存入mysql
 const session = require("express-session");
 const MysqlStore = require("express-mysql-session")(session);
@@ -33,6 +38,12 @@ const sessionStore = new MysqlStore({}, db);
 
 // 2.取用express
 const app = express();
+
+// 引用server
+const server = http.createServer(app)
+const io = socket(server);
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -361,6 +372,44 @@ app.post("/login", async (req, res) => {
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
 
+
+
+// 用api建立連線
+app.use('/api/messages', function (req, res) {
+  let messages = 'hello'
+  res.send(messages)
+})
+
+// 用io.on監聽事件
+
+const messages = [
+  // { userName: "kuo", message: "welcome!" }
+]
+
+io.on("connection", function (socket) {
+  console.log('連線成功')
+
+  // 伺服器端發送之前的全部訊息
+  io.emit("allMessage", messages)
+  
+
+  // 對sendmessage監聽(客戶端來的事件)
+  socket.on("sendMessage", function (message) {
+    console.log('監聽客戶端事件')
+    console.log(message)
+
+    // 此用戶發訊息時(sendmessage事件)，把新訊息(message)存入陣列
+    // messages.push(message)
+    // console.log('messages',messages)
+
+    // 收到sendMessage事件，發送"newMessage事件"給所有用戶(把新訊息(message)傳給所有用戶)
+    io.emit("newMessage", message)
+    // io.emit("allMessage", message)
+
+
+  })
+});
+
 //自訂404頁面
 app.use((req, res) => {
   res.type("text/plain");
@@ -368,42 +417,20 @@ app.use((req, res) => {
   res.send("404-找不到網頁");
 });
 
+
+
 const port = process.env.PORT || 3000;
 // 4.server 偵聽
-app.listen(port, () => {
+// app.listen(port, () => {
+//   console.log(`啟動~ port:${port}`);
+// });
+server.listen(port, () => {
   console.log(`啟動~ port:${port}`);
 });
 
 
-// 引入socket io套件
-const io = require("socket.io")
-
-// 用io.on監聽事件
-io.on('connection', (socket) => {
-  /* socket.on("login", ({ userId, userName }) => {: 這行程式碼使用 socket.on() 方法來監聽 "login" 事件，當客戶端送出 "login" 事件時，這段程式碼會執行相應的處理函式。socket 是表示與特定客戶端連線的 Socket.IO 套件所提供的物件。({ userId, userName }): 這部分語法是解構賦值，表示從接收到的事件資料中提取 userId 和 userName 兩個屬性。這意味著當客戶端送出 "login" 事件時，資料應該是一個物件，並且該物件應該包含 userId 和 userName 兩個屬性。const sameUser = users.find((user) => {: 這行程式碼將在名為 users 的陣列中尋找與 userName 相同的使用者資料。通常，users 陣列是在伺服器端維護的，它儲存了已經連線的使用者的資訊。return user.userName === userName: 這是 find() 方法的回呼函式，用來檢查陣列中的每個使用者物件，找到與傳入的 userName 相符的使用者。如果找到了相符的使用者，該使用者物件會被回傳。*/
-
-  /*
-  socket.on("login", ({ userId, userName }) => {
-    const sameUser = users.find((user) => {
-      return user.userName === userName
-    })
-  })
-*/
-
-  // 對登入進來的使用者發事件
-  socket.emit("connectionSuccess", {
-    success: true,
-    message: "開始聊天",
-    room: chatRooms,
-  })
 
 
-  users.push({
-    userId, userNamem
-  })
-
-
-});
 
 
 
