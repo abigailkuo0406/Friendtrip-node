@@ -25,7 +25,7 @@ router.post("/find", async (req, res) => {
   //查找訂單
   const findNormalOrder_sql = `SELECT product_order.*, product_order_credit.* FROM product_order
     INNER JOIN product_order_credit ON product_order.order_id = product_order_credit.order_id
-    WHERE product_order.member_id = ${req.body.memberID} ${status} 
+    WHERE product_order.member_id = ${req.body.memberID} ${status} ORDER BY product_order.complete_time DESC
    `;
   const [rows_order] = await db.query(findNormalOrder_sql);
 
@@ -68,11 +68,29 @@ router.post("/writeComment", async (req, res) => {
     }'`;
     const [rows2] = await db.query(hasComment_sql);
     res.json({ rows1: rows1, rows2: rows2 });
+
+    let inNumber = "";
+    comment.forEach((element, index) => {
+      if (index == 0) {
+        inNumber += `${element.product_id}`;
+      } else {
+        inNumber += `,${element.product_id}`;
+      }
+    });
+    const changeRating_sql = `UPDATE products p
+    JOIN (
+        SELECT product_id, ROUND(AVG(comment_rating), 1) AS avg_rating
+        FROM product_comment
+        WHERE product_id IN (${inNumber})
+        GROUP BY product_id
+    ) pc ON p.product_id = pc.product_id
+    SET p.product_rate = pc.avg_rating;`;
+    const [rowsRating] = await db.query(changeRating_sql);
   }
 });
 
 router.post("/getComment", async (req, res) => {
-  const getComment_sql = `SELECT product_comment.*, member.member_id, member.member_name FROM product_comment
+  const getComment_sql = `SELECT product_comment.*, member.member_id, member.member_name,member.images FROM product_comment
     INNER JOIN member ON product_comment.member_id = member.member_id
     WHERE product_id = ${req.body.productID}
    `;
