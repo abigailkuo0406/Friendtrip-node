@@ -8,6 +8,11 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
+// 引入moment套件
+const moment = require("moment");
+// 引入uuid套件
+const { v4: uuidv4 } = require("uuid")
+
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 const faceUpload = require(__dirname + "/modules/face-upload");
@@ -60,7 +65,7 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
@@ -86,7 +91,7 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
@@ -112,7 +117,7 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
@@ -368,3 +373,37 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`啟動~ port:${port}`);
 });
+
+
+// 引入socket io套件
+const io = require("socket.io")
+
+// 用io.on監聽事件
+io.on('connection', (socket) => {
+  /* socket.on("login", ({ userId, userName }) => {: 這行程式碼使用 socket.on() 方法來監聽 "login" 事件，當客戶端送出 "login" 事件時，這段程式碼會執行相應的處理函式。socket 是表示與特定客戶端連線的 Socket.IO 套件所提供的物件。({ userId, userName }): 這部分語法是解構賦值，表示從接收到的事件資料中提取 userId 和 userName 兩個屬性。這意味著當客戶端送出 "login" 事件時，資料應該是一個物件，並且該物件應該包含 userId 和 userName 兩個屬性。const sameUser = users.find((user) => {: 這行程式碼將在名為 users 的陣列中尋找與 userName 相同的使用者資料。通常，users 陣列是在伺服器端維護的，它儲存了已經連線的使用者的資訊。return user.userName === userName: 這是 find() 方法的回呼函式，用來檢查陣列中的每個使用者物件，找到與傳入的 userName 相符的使用者。如果找到了相符的使用者，該使用者物件會被回傳。*/
+
+  /*
+  socket.on("login", ({ userId, userName }) => {
+    const sameUser = users.find((user) => {
+      return user.userName === userName
+    })
+  })
+*/
+
+  // 對登入進來的使用者發事件
+  socket.emit("connectionSuccess", {
+    success: true,
+    message: "開始聊天",
+    room: chatRooms,
+  })
+
+
+  users.push({
+    userId, userNamem
+  })
+
+
+});
+
+
+
