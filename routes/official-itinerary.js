@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
 
   let where = " WHERE 1 ";
 
-  const t_sql = `SELECT COUNT(1) totalRows FROM itinerary_database ${where}`;
+  const t_sql = `SELECT COUNT(1) totalRows FROM public_itinerary ${where}`;
   const [[{ totalRows }]] = await db.query(t_sql);
   let totalPages = 0;
   let rows = [];
@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 
     // ===========================================================
 
-    const sql = `SELECT * FROM itinerary_database WHERE 1`;
+    const sql = `SELECT * FROM public_itinerary WHERE 1`;
     [rows] = await db.query(sql);
   }
   output = { ...output, totalRows, perPage, totalPages, page, rows };
