@@ -8,9 +8,9 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
-
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
+const faceUpload = require(__dirname + "/modules/face-upload");
 const previewForumPic = require(__dirname + "/modules/forum-img-preview");
 
 // 建立自訂行程照片上傳到指定資料夾
@@ -31,7 +31,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 3.取用cors
+// 3.取用corsbcryptjs
 const cors = require("cors");
 const corsOption = {
   credentials: true,
@@ -69,12 +69,72 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
+
 // 4.路由設定(自行依序往下新增)
 app.get("/", (req, res) => {
   res.send(`<h2>Hello</h2>
     <p>${process.env.DB_USER}</p>`);
 });
 app.use("/twoBooks", require(__dirname + "/routes/example")); //主程式掛API示範
+app.use("/restaurant", require(__dirname + "/routes/restaurant"));
+app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
+app.use("/area", require(__dirname + "/routes/area"));
+app.use("/restmeal", require(__dirname + "/routes/rest-meal"));
+app.use("/friends", require(__dirname + "/routes/friends"));
+app.use("/reserve", require(__dirname + "/routes/reserve"));
+app.use("/reserveinvites", require(__dirname + "/routes/reserve-invites"));
+app.use("/comment", require(__dirname + "/routes/rest-comment"));
 
 app.use("/restaurant", require(__dirname + "/routes/restaurant"));
 app.use("/restphoto", require(__dirname + "/routes/rest-photo"));
@@ -93,14 +153,28 @@ app.use("/leftMsg", require(__dirname + "/routes/forum-posts"));
 
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
 
+// 官方行程
+app.use(
+  "/show-official-itinerary",
+  require(__dirname + "/routes/official-itinerary.js")
+);
 
-app.use("/custom-itinerary",require(__dirname + "/routes/itinerary-create-task"));// 自訂行程-建立行程表單
-app.use("/public-itinerary",require(__dirname + "/routes/public-itinerary"));
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+); // 自訂行程-建立行程表單
+app.use("/public-itinerary", require(__dirname + "/routes/public-itinerary"));
 // 公開行程
 
-
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
 //照片上傳（單張）
-app.post("/preview", upload.single("preview"), (req, res) => {
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留言板進入點
+app.use("/show-my-posts", require(__dirname + "/routes/my-posts")); //留言板進入點
+app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"));
+// 👇 將 comments 寫入資料庫
+app.use("/add-a-new-comment", require(__dirname + "/routes/addNewComment"));
+// ☝️ 將 comments 寫入資料庫
+app.post("/preview", faceUpload.single("preview"), (req, res) => {
   console.log(req.file);
   res.json(req.file);
 });
@@ -116,7 +190,20 @@ app.get("/try-db", async (req, res) => {
   res.json(rows);
 });
 
+// 會員中心、配對
+app.use("/login", require(__dirname + "/routes/auth"));
+app.use("/register", require(__dirname + "/routes/register"));
+app.use("/edit", require(__dirname + "/routes/edit"));
+app.use("/catchMember", require(__dirname + "/routes/catchMember"));
+app.use("/select", require(__dirname + "/routes/select"));
+app.use("/makefriend", require(__dirname + "/routes/makefriend"));
+app.use("/condition", require(__dirname + "/routes/condition"));
 
+// 自訂行程-建立行程表單
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+);
 
 //自訂行程-上傳照片(建立表單)
 app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
@@ -124,7 +211,6 @@ app.post("/try-preview", previewInitImg.single("coverPhoto"), (req, res) => {
   res.json(req.file);
 });
 
-//儲存景點照片(google map)
 const request = require("request");
 const path = require("path");
 
@@ -183,14 +269,13 @@ app.get("/try-name", async (req, res) => {
   );
   res.json(rows);
 });
-
 //自訂行程-取得該會員最新行程編號
 app.get("/get-itin_id", async (req, res) => {
   const itin_member = req.query.itin_member;
   console.log("itin_member=>", itin_member);
 
   const [result] = await db.query(
-    `SELECT itin_id,name,itin_member_id FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,
+    `SELECT itin_id,name FROM itinerary WHERE itin_member_id=? ORDER BY create_at DESC limit 1 `,
     [itin_member]
   );
   console.log("result intin_id=>", result);

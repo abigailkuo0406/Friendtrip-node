@@ -105,6 +105,8 @@ router.post("/admin", async (req, res) => {
     member_birth: rows[0].member_birth,
     id_number: rows[0].id_number,
     gender: rows[0].gender,
+    location: rows[0].location,
+    mobile: rows[0].mobile,
     create_at: rows[0].create_at,
     token,
   };
