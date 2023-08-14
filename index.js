@@ -198,7 +198,7 @@ app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 app.use("/select", require(__dirname + "/routes/select"));
 app.use("/makefriend", require(__dirname + "/routes/makefriend"));
 app.use("/condition", require(__dirname + "/routes/condition"));
-
+app.use("/first", require(__dirname + "/routes/first"));
 // 自訂行程-建立行程表單
 app.use(
   "/custom-itinerary",
