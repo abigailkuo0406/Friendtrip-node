@@ -8,6 +8,14 @@ if (process.argv[2] === "production") {
   require("dotenv").config();
 }
 
+
+// 引入moment套件
+const moment = require("moment");
+// 引入uuid套件
+const { v4: uuidv4 } = require("uuid")
+// 引入socket io套件
+const socket = require("socket.io")
+
 // 以下進階匯出方式上傳檔案
 const upload = require(__dirname + "/modules/img-upload");
 const faceUpload = require(__dirname + "/modules/face-upload");
@@ -19,6 +27,8 @@ const previewInitImg = require(__dirname + "/modules/itinerary-img-preview");
 // 1.引入express
 const express = require("express");
 
+const http = require('http')
+
 //將seesion存入mysql
 const session = require("express-session");
 const MysqlStore = require("express-mysql-session")(session);
@@ -28,9 +38,16 @@ const sessionStore = new MysqlStore({}, db);
 
 // 2.取用express
 const app = express();
+
+// 引用server
+const server = http.createServer(app)
+const io = socket(server);
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// 3.取用corsbcryptjs
 // 3.取用corsbcryptjs
 const cors = require("cors");
 const corsOption = {
@@ -60,7 +77,59 @@ app.use((req, res, next) => {
       //   id: 12,
       //   email: 'test@test.com'
       // }
-    } catch (ex) {}
+    } catch (ex) { }
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) { }
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) { }
     if (jwtData) {
       res.locals.jwtData = jwtData; // 標記有沒有使用 token
     }
@@ -158,7 +227,17 @@ app.use(
   "/show-official-itinerary",
   require(__dirname + "/routes/official-itinerary.js")
 );
+// 官方行程
+app.use(
+  "/show-official-itinerary",
+  require(__dirname + "/routes/official-itinerary.js")
+);
 
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+); // 自訂行程-建立行程表單
+app.use("/public-itinerary", require(__dirname + "/routes/public-itinerary"));
 app.use(
   "/custom-itinerary",
   require(__dirname + "/routes/itinerary-create-task")
@@ -167,7 +246,18 @@ app.use("/public-itinerary", require(__dirname + "/routes/public-itinerary"));
 // 公開行程
 
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
 //照片上傳（單張）
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留言板進入點
+app.use("/show-my-posts", require(__dirname + "/routes/my-posts")); //留言板進入點
+app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"));
+// 👇 將 comments 寫入資料庫
+app.use("/add-a-new-comment", require(__dirname + "/routes/addNewComment"));
+// ☝️ 將 comments 寫入資料庫
+app.post("/preview", faceUpload.single("preview"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留言板進入點
 app.use("/show-my-posts", require(__dirname + "/routes/my-posts")); //留言板進入點
 app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"));
@@ -198,7 +288,7 @@ app.use("/catchMember", require(__dirname + "/routes/catchMember"));
 app.use("/select", require(__dirname + "/routes/select"));
 app.use("/makefriend", require(__dirname + "/routes/makefriend"));
 app.use("/condition", require(__dirname + "/routes/condition"));
-
+app.use("/first", require(__dirname + "/routes/first"));
 // 自訂行程-建立行程表單
 app.use(
   "/custom-itinerary",
@@ -356,6 +446,44 @@ app.post("/login", async (req, res) => {
 //設定靜態內容的資料夾(透過後端未經修改檔案都稱為靜態內容)
 app.get("*", express.static("public"));
 
+
+
+// 用api建立連線
+app.use('/api/messages', function (req, res) {
+  let messages = 'hello'
+  res.send(messages)
+})
+
+// 用io.on監聽事件
+
+const messages = [
+  // { userName: "kuo", message: "welcome!" }
+]
+
+io.on("connection", function (socket) {
+  console.log('連線成功')
+
+  // 伺服器端發送之前的全部訊息
+  io.emit("allMessage", messages)
+  
+
+  // 對sendmessage監聽(客戶端來的事件)
+  socket.on("sendMessage", function (message) {
+    console.log('監聽客戶端事件')
+    console.log(message)
+
+    // 此用戶發訊息時(sendmessage事件)，把新訊息(message)存入陣列
+    // messages.push(message)
+    // console.log('messages',messages)
+
+    // 收到sendMessage事件，發送"newMessage事件"給所有用戶(把新訊息(message)傳給所有用戶)
+    io.emit("newMessage", message)
+    // io.emit("allMessage", message)
+
+
+  })
+});
+
 //自訂404頁面
 app.use((req, res) => {
   res.type("text/plain");
@@ -363,8 +491,20 @@ app.use((req, res) => {
   res.send("404-找不到網頁");
 });
 
+
+
 const port = process.env.PORT || 3000;
 // 4.server 偵聽
-app.listen(port, () => {
+// app.listen(port, () => {
+//   console.log(`啟動~ port:${port}`);
+// });
+server.listen(port, () => {
   console.log(`啟動~ port:${port}`);
 });
+
+
+
+
+
+
+

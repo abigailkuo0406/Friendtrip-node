@@ -60,4 +60,16 @@ router.delete("/delete", multipartParser, async (req, res) => {
   });
 })
 
+// 取得單個朋友資料
+router.get("/:friendsCid", async (req, res) => {
+
+  const friendsCid = parseInt(req.params.friendsCid) || 0;
+  const sql = `SELECT * FROM member WHERE member_id=${friendsCid}`;
+  const [result] = await db.query(sql);
+
+  res.json({
+    result: result,
+  });
+});
+
 module.exports = router;
