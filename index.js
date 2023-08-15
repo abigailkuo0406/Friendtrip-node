@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // 3.取用corsbcryptjs
+// 3.取用corsbcryptjs
 const cors = require("cors");
 const corsOption = {
   credentials: true,
@@ -42,6 +43,58 @@ const corsOption = {
 app.use(cors(corsOption));
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
+
+app.use((req, res, next) => {
+  // res.locals.nickname = '小新';
+  // res.locals.title = '小新的網站';
+
+  const auth = req.get("Authorization");
+  if (auth && auth.indexOf("Bearer ") === 0) {
+    const token = auth.slice(7);
+    let jwtData = null;
+    try {
+      jwtData = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 測試的情況, 預設是登入
+
+      // jwtData = {
+      //   id: 12,
+      //   email: 'test@test.com'
+      // }
+    } catch (ex) {}
+    if (jwtData) {
+      res.locals.jwtData = jwtData; // 標記有沒有使用 token
+    }
+  }
+
+  next();
+});
 
 app.use((req, res, next) => {
   // res.locals.nickname = '小新';
@@ -158,7 +211,17 @@ app.use(
   "/show-official-itinerary",
   require(__dirname + "/routes/official-itinerary.js")
 );
+// 官方行程
+app.use(
+  "/show-official-itinerary",
+  require(__dirname + "/routes/official-itinerary.js")
+);
 
+app.use(
+  "/custom-itinerary",
+  require(__dirname + "/routes/itinerary-create-task")
+); // 自訂行程-建立行程表單
+app.use("/public-itinerary", require(__dirname + "/routes/public-itinerary"));
 app.use(
   "/custom-itinerary",
   require(__dirname + "/routes/itinerary-create-task")
@@ -167,7 +230,18 @@ app.use("/public-itinerary", require(__dirname + "/routes/public-itinerary"));
 // 公開行程
 
 app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
+app.use("/add-a-new-post", require(__dirname + "/routes/add-a-post"));
 //照片上傳（單張）
+app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留言板進入點
+app.use("/show-my-posts", require(__dirname + "/routes/my-posts")); //留言板進入點
+app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"));
+// 👇 將 comments 寫入資料庫
+app.use("/add-a-new-comment", require(__dirname + "/routes/addNewComment"));
+// ☝️ 將 comments 寫入資料庫
+app.post("/preview", faceUpload.single("preview"), (req, res) => {
+  console.log(req.file);
+  res.json(req.file);
+});
 app.use("/show-forum-posts", require(__dirname + "/routes/forum-posts")); //留言板進入點
 app.use("/show-my-posts", require(__dirname + "/routes/my-posts")); //留言板進入點
 app.use("/delete-a-post-of-mine", require(__dirname + "/routes/delete-a-post"));
